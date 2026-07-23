@@ -118,7 +118,8 @@ When are End Users also Artists?
 	- In the case of these very small tags recommend using only a random string. 
 
 ##### 1.17 Noubin URL
-- A full hyperlink accessible on the internet — a complete URL using `https`, which MAY include query parameters and path components as needed
+- A full hyperlink accessible on the internet — a complete URL using `https`, 
+- Eg `https://domain.com/noubin/artist/album` 
 - Intended to be both stored in a Noubin NFC tag (as the Noubin Key when the tag uses a URI record) and hosted at a linkhost
 - Noubin URLs SHOULD be well formatted: use `https`, the path section SHOULD end with a trailing slash pointing at the release folder, and follow the NOUBIN URL SPECIFICATIONS in this document
 - When accessed by a browser the Noubin URL returns a regular web page 
@@ -248,6 +249,7 @@ When are End Users also Artists?
 	- Noubin Players searching for metadata will resolve this to `https://domain.com/noubin/artist/release/web.noudata` 
 - Noubin URLS SHOULD use `/noubin/` as the first folder to indicate all sub folder content is Noubin Player readable.
 	- EXCEPTION short URLS , see below
+	- EXCEPTION Urls that are domains dedicated to noubin linkhosting e.g. `noubin.com` 
 - Noubin URLs MAY include the artist name in the domain OR a path element e.g `https://artist.com/noubin/release/` or `https://domain.com/noubin/artist/release/`
 	- Note the actual list of artists who worked on a track can be defined in `web.noudata` in far greater detail than can be put in the URL. 
 	-  EXCEPTION short URLS , see below
@@ -1009,8 +1011,10 @@ Both procedures share the same first step (Extracting the Noubin Key from an NDE
 * **For NDEF URI:** 
 	1. The player MUST fully expand the URI payload by resolving the URI Identifier Code byte into its full string prefix (e.g., `0x04` becomes `https://`).
     2. The player MUST decode the fully expanded payload into a UTF-8 string. 
-	3. **`noubin.com` redirect unwrapping (URL Noubin Keys only):** If the Noubin Key is a URL whose host is `noubin.com` or a subdomain of `noubin.com`, AND it contains a `?redirect` query parameter, the player MUST replace the Noubin Key with the URL-decoded value of that parameter (including any query parameters on the decoded URL) before continuing. See ADDENDUM 1.
+	3. SPECIAL CASE **`noubin.com` redirect unwrapping (URL Noubin Keys only):** If the Noubin Key is a URL whose host is `noubin.com` or a subdomain of `noubin.com`, AND it contains a `?redirect` query parameter, the player MUST replace the Noubin Key with the URL-decoded value of that parameter (including any query parameters on the decoded URL) before continuing. See ADDENDUM 1.
 		- NOTE `noubin.com` urls that don't contain a `?redirect` query parameter should be left as is and in that case `noubin.com` is treated as a regular linkhost. 
+	- NOTE At this point if there are query parameters or any other URL components beyond host and path (e.g. port numbers, `#` fragments, `;` matrix parameters, userinfo before `@`) this data remains and is included in the `noubinKey`
+	- NOTE Percent-encoded sequences (e.g. `%20`, `%2F`, `%3A`) are also left as-is in the `noubinKey`, whether they appear in the path, query, fragment, or elsewhere. Do not URL-decode the path at this stage. The only decoding in Phase 2 is the special `?redirect=` unwrap in step 3 above, which URL-decodes that parameter's value when replacing the Noubin Key.
 * **For NDEF TEXT:**
     1. The player MUST read the initial Status Byte to determine the encoding and the length of the Language Code.
     2. The player MUST discard the Status Byte and the Language Code bytes.
@@ -1029,9 +1033,16 @@ Each example shows what is encoded on the tag → the resulting **Noubin Key** (
 - Prefix `0x03` (`http://`) + payload `artist.com/noubin/album/` → `http://artist.com/noubin/album/`
 - Prefix `0x00` (no prefix) + payload `https://artist.com/noubin/album/` → `https://artist.com/noubin/album/`
 - Tag encodes `https://artist.com/noubin/album?ref=nfc` → `https://artist.com/noubin/album?ref=nfc` (query parameters kept)
+- Tag encodes `https://artist.com/noubin/album#track-3` → `https://artist.com/noubin/album#track-3` (fragment kept)
+- Tag encodes `https://artist.com:8443/noubin/album/` → `https://artist.com:8443/noubin/album/` (port kept)
+- Tag encodes `https://user:pass@artist.com/noubin/album/` → `https://user:pass@artist.com/noubin/album/` (userinfo kept)
+- Tag encodes `https://artist.com/noubin/album;v=1/` → `https://artist.com/noubin/album;v=1/` (matrix parameter kept)
+- Tag encodes `https://artist.com/noubin/album?ref=nfc#track-3` → `https://artist.com/noubin/album?ref=nfc#track-3` (query and fragment both kept)
+- Tag encodes `https://artist.com/noubin/purple%20rain/` → `https://artist.com/noubin/purple%20rain/` (percent-encoding in the **path** kept — not decoded to a space)
+- Tag encodes `https://artist.com/noubin/album?q=hello%20world` → `https://artist.com/noubin/album?q=hello%20world` (percent-encoding in the **query** kept)
 - Tag encodes `https://domain.com/noubin/artist/album/index.html` → `https://domain.com/noubin/artist/album/index.html` (path not canonicalised)
 - `noubin.com` as regular linkhost (no `?redirect=`): tag encodes `https://noubin.com/noubin/artist/album/fnj82974` → `https://noubin.com/noubin/artist/album/fnj82974`
-- `noubin.com` redirect wrapper: tag encodes `https://noubin.com/r/?redirect=https%3A%2F%2Fartist.com%2Fnoubin%2Falbum%2F` → `https://artist.com/noubin/album/` (unwrap in step 3)
+- `noubin.com` redirect wrapper: tag encodes `https://noubin.com/r/?redirect=https%3A%2F%2Fartist.com%2Fnoubin%2Falbum%2F` → `https://artist.com/noubin/album/` (unwrap in step 3 — here the `%3A%2F%2F` in the query **is** URL-decoded because it is the redirect target)
 - `noubin.com` redirect with query on target: tag encodes `https://noubin.com/r/?redirect=https%3A%2F%2Fartist.com%2Fnoubin%2Falbum%3Fversion%3D2` → `https://artist.com/noubin/album?version=2`
 
 *NDEF Text records (language code bytes discarded, text payload kept as-is):*
@@ -1044,10 +1055,18 @@ Applied to a Noubin Key string to produce a **Normalised Noubin Key** for local 
 
 Once extracted, the player MUST apply the following transformations in exact order:
 
-1. **Case Normalization:** The player MUST substitute all uppercase English alphabet characters (`A-Z`) with their lowercase equivalents (`a-z`). Other characters MUST remain unchanged.
+1. **Case Normalization (ASCII only):** The player MUST substitute all uppercase English alphabet characters (`A-Z`) with their lowercase equivalents (`a-z`). Non-ASCII characters (e.g. `Ö`, `É`, `ß`) MUST NOT be case-folded — leave them exactly as they are. Other characters MUST remain unchanged. (Note this rule also makes A-Z hex letters in percent-encoding lower case, so `%2F` becomes `%2f`. still means the same thing)
 2. **Whitespace Trimming:** The player MUST remove any leading or trailing whitespace characters from the string.
-3. **Protocol Stripping (URL Noubin Keys only):** If the Noubin Key is a URL, the player MUST remove the exact string `http://` or `https://` from the beginning of the string, if present. (Note this is not the same as ignoring the NDEF URI identifier code byte, which would also sometimes trim `www.`)
-4. **Query parameter stripping (URL Noubin Keys only):** If the Noubin Key is a URL, the player MUST remove any query parameters from the end of the string.
+3. **Protocol Stripping (URL Noubin Keys only):** If the Noubin Key is a URL, the player MUST remove the exact string `http://` or `https://` from the beginning of the string, if present. (Note this is not the same as ignoring the NDEF URI identifier code byte, which would also sometimes prepend `www.` — that is handled in step 5.)
+4. **Authority and parameter stripping (URL Noubin Keys only):** If the Noubin Key is a URL, the player MUST reduce it to host + path, applying the following in order:
+	1. Remove the fragment: delete `#` and everything after it
+	2. Remove the query: delete `?` and everything after it
+	3. Remove userinfo: if the authority contains `@`, delete everything from the start of the authority through the `@` (inclusive), leaving the host (and optional port) that followed it
+	4. Remove a port number: if the authority has a colon-port after the host (e.g. `artist.com:8443/...`), delete that `:port`. Do NOT remove colons that appear later in the path — path segments MAY contain `:`
+	5. Leave matrix parameters (`;…`) in the path unchanged at this step
+5. **`www.` stripping (URL Noubin Keys only):** If the host begins with the label `www.`, remove that label and its following dot (e.g. `www.artist.com/…` → `artist.com/…`). Do not remove other subdomains (e.g. leave `shop.artist.com` as-is).
+6. **Path percent-decoding (URL Noubin Keys only):** In the path only, decode each `%XX` percent-sequence (two hex digits) to the corresponding byte, **except** do not decode `%2f` (encoded `/`) — leave `%2f` as the three characters `%2f` so path segment boundaries stay stable. Apply decoding left to right. This means e.g. `%20` becomes a space, `%61` becomes `a`, and UTF-8 sequences such as `%c3%a4` become `ä`.
+7. **Trailing slash (URL Noubin Keys only):** If the path is empty or does not end with `/`, append `/`. (e.g. `artist.com/noubin/album` → `artist.com/noubin/album/`; `artist.com` → `artist.com/`)
 
 The resulting string is the **Normalised Noubin Key**. Players MUST perform a byte-for-byte equality comparison of this value against `noubinKeyNormalised` in the local media library to match to a playable item (see `03 metadata-base.md`).
 
@@ -1056,10 +1075,12 @@ The resulting string is the **Normalised Noubin Key**. Players MUST perform a by
 - If found but playback cannot start due to e.g. invalid local media file the player MUST give an appropriate error message e.g. ".noudata file found but media not found"
 
 **Notes on Noubin Key Normalisation:**
-- Should Noubin Key normalisation remove `www.`? No. Subdomains including `www.` stay if present.
-- Should Noubin Key normalisation 'fix' the path? e.g. remove `index.html` or add a trailing slash? No. The normalised key reflects the Noubin Key as encoded on the tag (after redirect unwrapping), not a canonical server-side URL.
+- Should Noubin Key normalisation remove `www.`? Yes — see step 5. Other subdomains stay.
+- Should Noubin Key normalisation add a trailing slash? Yes — see step 7. Do **not** strip `index.html` or other filenames here; that is only for HTTP fetch in 6.3. A tag ending in `…/album/index.html` therefore normalises to a different key than `…/album/`.
+- Should non-ASCII letters be lowercased? No — only ASCII `A-Z` → `a-z` (step 1).
+- Should `%2f` in the path be decoded to `/`? No — leave it encoded so it does not invent new path segments (step 6).
 - Should Noubin Key normalisation of `noubin.com` URLS do the special unwrapping procedure if they contain a ?redirect query paramater? YES this MUST happen before Noubin Key Normalisation, otherwise after the query parameters are dumped  `noubin.com` wrapper URLs would all collapse to the same key (e.g. `noubin.com/r/`).
-- Noubin URL Normalisation (below) uses different path rules for HTTP fetch. Do not apply those fetch rules here.
+- Noubin URL Normalisation (below) uses additional path rules for HTTP fetch (including stripping `index.html`). Do not apply those fetch-only rules here.
 
 **Noubin Key Normalisation Examples:**
 
@@ -1068,14 +1089,25 @@ Each example shows the **Noubin Key** (after Phase 1–2 extraction, stored as `
 - Plain text tag: `MyPlaylist01` > `myplaylist01`
 - Plain text with surrounding whitespace: `  summer mix  ` > `summer mix`
 - Typical artist URL: `https://artist.com/noubin/purple-rain/` > `artist.com/noubin/purple-rain/`
-- URL with `www.`: `https://www.artist.com/noubin/album/` > `www.artist.com/noubin/album/`
-- Mixed case URL: `https://Artist.COM/noubin/HELLO/` > `artist.com/noubin/hello/`
-- URL with query parameters stripped: `https://artist.com/noubin/album?ref=nfc` > `artist.com/noubin/album`
-- Malformed path left as-is (no trailing slash): `https://domain.com/noubin/artist/album` > `domain.com/noubin/artist/album`
-- Malformed path left as-is (`index.html` not stripped): `https://domain.com/noubin/artist/album/index.html` > `domain.com/noubin/artist/album/index.html`
-- `noubin.com` as regular linkhost (no `?redirect=`): `https://noubin.com/noubin/artist/album/fnj82974` > `noubin.com/noubin/artist/album/fnj82974`
+- `www.` stripped: `https://www.artist.com/noubin/album/` > `artist.com/noubin/album/`
+- Mixed case ASCII folded, non-ASCII left as-is: `https://Artist.COM/noubin/ÖAlbum/` > `artist.com/noubin/Öalbum/`
+- Query stripped + trailing slash: `https://artist.com/noubin/album?ref=nfc` > `artist.com/noubin/album/`
+- Fragment stripped + trailing slash: `https://artist.com/noubin/album#track-3` > `artist.com/noubin/album/`
+- Query and fragment stripped + trailing slash: `https://artist.com/noubin/album?ref=nfc#track-3` > `artist.com/noubin/album/`
+- Port stripped: `https://artist.com:8443/noubin/album/` > `artist.com/noubin/album/`
+- Userinfo stripped: `https://user:pass@artist.com/noubin/album/` > `artist.com/noubin/album/`
+- Matrix parameter kept in path: `https://artist.com/noubin/album;v=1/` > `artist.com/noubin/album;v=1/`
+- Colon in a path segment kept (not a port): `https://artist.com/noubin/album:deluxe/` > `artist.com/noubin/album:deluxe/`
+- Percent-encoding decoded in path (`%20` → space): `https://artist.com/noubin/purple%20rain/` > `artist.com/noubin/purple rain/`
+- Unnecessary encoding of unreserved char decoded (`%61` → `a`): `https://artist.com/noubin/%61lbum/` > `artist.com/noubin/album/`
+- Encoded slash NOT decoded (segment boundary preserved): `https://artist.com/noubin/a%2Fb/` > `artist.com/noubin/a%2fb/`
+- Percent-encoding only in query — query stripped: `https://artist.com/noubin/album?q=hello%20world` > `artist.com/noubin/album/`
+- Trailing slash added: `https://domain.com/noubin/artist/album` > `domain.com/noubin/artist/album/`
+- Empty path becomes `/`: `https://artist.com` > `artist.com/`
+- Filename on path left as-is (not stripped here): `https://domain.com/noubin/artist/album/index.html` > `domain.com/noubin/artist/album/index.html/`
+- `noubin.com` as regular linkhost (no `?redirect=`): `https://noubin.com/noubin/artist/album/fnj82974` > `noubin.com/noubin/artist/album/fnj82974/`
 - `noubin.com` redirect wrapper — tag encodes `https://noubin.com/r/?redirect=https%3A%2F%2Fartist.com%2Fnoubin%2Falbum%2F` but after Phase 2 unwrap the Noubin Key is `https://artist.com/noubin/album/` > `artist.com/noubin/album/`
-- `noubin.com` redirect with query on target — tag encodes `https://noubin.com/r/?redirect=https%3A%2F%2Fartist.com%2Fnoubin%2Falbum%3Fversion%3D2`, after unwrap Noubin Key is `https://artist.com/noubin/album?version=2` > `artist.com/noubin/album`
+- `noubin.com` redirect with query on target — tag encodes `https://noubin.com/r/?redirect=https%3A%2F%2Fartist.com%2Fnoubin%2Falbum%3Fversion%3D2`, after unwrap Noubin Key is `https://artist.com/noubin/album?version=2` > `artist.com/noubin/album/`
 
 #### 6.3 Noubin URL Normalisation
 
@@ -1084,11 +1116,16 @@ Applied when a web-capable player needs to fetch `web.noudata` from the internet
 The player MUST apply the following in exact order:
 
 1. Upgrade to HTTPS: If the URL begins with `http://`, the player MUST substitute `https://`.
-2. Metadata URL resolution:
-	1. Remove and store query parameters: If the URL contains query parameters (e.g. `?ref=nfc`), remove and store them.
-	2. **Path Normalization:** Treat the URL as a directory path. If it does not end in a trailing slash (`/`), append one. If the final path segment contains a period (`.`) followed by an extension (e.g. `index.html`, `page.php`), strip that entire filename before appending the trailing slash.
-	3. **Append `web.noudata`:** Append `web.noudata` to the path.
-	4. **Re-append query parameters:** If query parameters were stored in step 3.1, append them again.
+2. If this is a `noubin.com` redirect wrapper URL, apply the same redirect unwrapping as in 6.1 Phase 2 step 3 before continuing (so the fetch targets the artist's URL, not `noubin.com/r/`).
+3. Metadata URL resolution:
+	1. Remove and discard the fragment: delete `#` and everything after it (fragments are not sent in HTTP requests).
+	2. Remove and store query parameters: If the URL contains query parameters (e.g. `?ref=nfc`), remove and store them.
+	3. Remove userinfo and port from the authority if present (same rules as 6.2 step 4.3–4.4), leaving `https://` + host + path. Path matrix parameters (`;`) remain.
+	4. Strip a leading `www.` host label if present (same rule as 6.2 step 5).
+	5. Percent-decode the path as in 6.2 step 6 (decode `%XX` except leave `%2f` / `%2F` encoded). Case-fold ASCII in the URL first if not already done, or treat `%2F` and `%2f` the same when deciding not to decode.
+	6. **Path Normalization:** Treat the URL as a directory path. If it does not end in a trailing slash (`/`), append one. If the final path segment contains a period (`.`) followed by an extension (e.g. `index.html`, `page.php`), strip that entire filename before appending the trailing slash.
+	7. **Append `web.noudata`:** Append `web.noudata` to the path.
+	8. **Re-append query parameters:** If query parameters were stored in step 3.2, append them again.
 
 The resulting URL is used for the HTTPS GET request.
 
@@ -1097,7 +1134,13 @@ The resulting URL is used for the HTTPS GET request.
 - `https://domain.com/noubin/artist/album/` > `https://domain.com/noubin/artist/album/web.noudata`
 - `https://domain.com/noubin/artist/album/fnj82974` > `https://domain.com/noubin/artist/album/fnj82974/web.noudata`
 - `https://domain.com/noubin/artist/album/index.html` > `https://domain.com/noubin/artist/album/web.noudata`
+- `https://www.artist.com/noubin/album/` > `https://artist.com/noubin/album/web.noudata` (`www.` stripped)
+- `https://artist.com/noubin/purple%20rain/` > `https://artist.com/noubin/purple rain/web.noudata` (path percent-decoded)
 - `https://domain.com/noubin/artist/album?ref=nfc` > `https://domain.com/noubin/artist/album/web.noudata?ref=nfc`
+- `https://domain.com/noubin/artist/album#track-3` > `https://domain.com/noubin/artist/album/web.noudata` (fragment discarded, not re-appended)
+- `https://domain.com/noubin/artist/album?ref=nfc#track-3` > `https://domain.com/noubin/artist/album/web.noudata?ref=nfc`
+- `https://artist.com:8443/noubin/album/` > `https://artist.com/noubin/album/web.noudata` (port stripped for fetch)
+- `https://user:pass@artist.com/noubin/album/` > `https://artist.com/noubin/album/web.noudata` (userinfo stripped for fetch)
 - `https://noubin.com/r/?redirect=https%3A%2F%2Fartist.com%2Fnoubin%2Falbum%3Fversion%3D2` → `https://artist.com/noubin/album/web.noudata?version=2`
 - `https://noubin.com/noubin/artist/album/fnj82974` > `https://noubin.com/noubin/artist/album/fnj82974/web.noudata`
 - `https://noub.in/fnj82974/` > `https://noub.in/fnj82974/web.noudata`
@@ -1109,7 +1152,7 @@ This is a long one
 
 
 - At the time of writing there is a potential issue with Software Noubin Player deep links. 
-- Apps must register with operating systems the domains for which URLS should not open in a general browser but be redirected to the app. 
+- Apps must register with operating systems the domains for which URLS should not open in a general browser but instead be redirected to the app. 
 	- This is known generally as Deep Linking although each OS has it's own specific name and implementation. 
 - Note this redirection behaviour is relevant only when the app does not have focus. 
 	- When an app has focus than typically it is able to intercept all NFC payloads directly. (Which is how software players can play non-URL payloads linked to local media) 
