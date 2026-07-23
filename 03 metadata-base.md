@@ -27,7 +27,7 @@ Finally there are software considerations where structuring data in a given way 
 
 `.noudata` metadata files MUST be JSON format
 
-For information about file naming and organisation see `02 standard.md` section NOUBIN MEDIA LIBRARY SPECIFICATIONS
+For information about file naming and organisation see `02 standard.md` section 4 NOUBIN MEDIA LIBRARY SPECIFICATIONS
 
 Structure overview (selectively expanded)
 ```
@@ -97,18 +97,18 @@ ROOT
 ##### `noubinKey` (string)
 - Optional in local `.noudata` files; MUST NOT appear in `web.noudata` files
 	- if not present a Noubin can not yet be tapped to start playback for this media, it can only be played through player UI. 
-- The Noubin Key extracted from the NFC tag's NDEF record (see Extracting the Noubin Key from an NDEF record in section 6 of `02 standard.md`)
+- The Noubin Key extracted from the NFC tag's NDEF record (see section 6.1 Extracting the `noubinKey` from an NDEF record in `02 standard.md`)
 	- For URI records: the full expanded URL string (e.g. `https://artist.com/noubin/album/`), 
 		- not the single-byte NDEF URI prefix form
 	- For Text records: the decoded text payload
 - Set by the player during the `unite` operation or when the user associates a tag with a playable item — not by linkhosts in `web.noudata`
 - Stored without normalisation; use `noubinKeyNormalised` for tap matching
-- see `02 standard.md` section 6 NOUBIN NDEF DATA TRANSFORMS for more information
+- see `02 standard.md` sections 6.1–6.2 for more information
 
 ##### `noubinKeyNormalised` (string)
 - Optional in local `.noudata` files; MUST NOT appear in `web.noudata` files
 	- if not present, the player SHOULD derive it from `noubinKey` using Noubin Key Normalisation when indexing the library, and then save it. 
-- The Normalised Noubin Key produced by applying Noubin Key Normalisation to `noubinKey` (see section 6 of `02 standard.md`)
+- The Normalised Noubin Key produced by applying Noubin Key Normalisation to `noubinKey` (see section 6.2 of `02 standard.md`)
 - Used for byte-for-byte equality comparison when a tag is tapped
 - Set by the player during the `unite` operation or when the user associates a tag with a playable item
 - Players SHOULD index this value in the library database (e.g. a hash table) so taps can be matched without re-normalising on every read
@@ -125,12 +125,12 @@ ROOT
 
 ##### `playableItemSafeTitle` (string)
 - Optional
-- If the `playableItemTitle` contains characters that are not permitted under the Safe file and folder names from `02 standard.md` then the player/media management library should do a conversion to safe characters. 
+- If the `playableItemTitle` contains characters that are not permitted under section 1.26 Safe file and folder names of `02 standard.md` then the player/media management library should do a conversion to safe characters. 
 - This field should contain the result of that conversion AND this is the string used to name the metadata file in the filesystem e.g. `_<release>.noudata`
 - E.g. the album is called "HE??O" 
 	- A player/media software accesses `web.noudata` from the Noubin URL 
 	- The `playableItemTitle` is "HE??O" which is fine for display but the Player/Media Library software detects contains illegal characters for a file path
-	- Upon import to the library the Player/Media software decides how to convert "HE??O" to safe characters as permitted in the Safe file and folder names rules in `02 standard.md` 
+	- Upon import to the library the Player/Media software decides how to convert "HE??O" to safe characters as permitted in section 1.26 Safe file and folder names of `02 standard.md` 
 		- Note we don't define a deterministic way to do this as the best possible way is stylistic, not deterministic. E.g.  "HE??O" should become "HELLO" but "GOODBYE?" Should become "GOODBYE". 
 	- Say the result is "HEO". Not ideal but acceptable as user doesn't interact directly with the metadata file much.
 	- Then `playableItemSafeTitle` is set to "HEO" and the local release `.noudata` file is named `_HEO.noudata` 
@@ -312,7 +312,7 @@ Back to the schema:
 	- Expect extensions may be implemented here in future, so if it's an unrecognised enum value treat as `other`
 - This is guidance towards how the credits should be filled in
 	- Used to suggest roles that should be used when generating `web.noudata` metadata specific for each industry sector. 
-	- Used to inform `unite` function that matches `web.noudata` to actual media files purchased from a store, as there are different industry conventions around filenames for .e.g music vs audiobooks. See `02 standard.md` section `Reference: heuristics for uniting mediaTitle and uniteData with actual media filenames`
+	- Used to inform `unite` function that matches `web.noudata` to actual media files purchased from a store, as there are different industry conventions around filenames for .e.g music vs audiobooks. See `02 standard.md` section 4.7.1 Reference: heuristics for uniting `mediaTitle` and `uniteData` with actual media filenames
 - This is not meant to be a perfect or exhaustive list. Could theoretically include e.g. comedy, radio play, speech etc but those types of productions are not linked to their own distribution channel conventions at the moment. For example comedy recordings are often distributed through the existing music, podcast or video channels and will use file namings from those worlds.
 	- Since free text entry is always possible the creator can bend existing profiles or use the `other` profile to achieve what they want. 
 	- You can still make "comedy" searchable by including that as a relevant category in the `categories` section (as a tag, genre etc)
@@ -338,7 +338,7 @@ Back to the schema:
 
 ##### `primaryArtistSafeName` (string)
 - Optional
-- If the first `primaryArtistName` or `primaryArtistOverrideName` contains characters that are not permitted in filenames under the Safe file and folder names from `02 standard.md` then the player/media management library should do a conversion to safe characters.
+- If the first `primaryArtistName` or `primaryArtistOverrideName` contains characters that are not permitted in filenames under section 1.26 Safe file and folder names of `02 standard.md` then the player/media management library should do a conversion to safe characters.
 - Or if the artist prefers they can set their safe name here that will be used for e.g. file paths
 - e.g. if the artists name is `MYSTERY *`
 - They can say their `primaryArtistSafeName` should be "MYSTERY STAR"
@@ -472,9 +472,9 @@ Back to the schema:
 - `localCoverImage` is a child of `localPlaybackData` and represents images set by the user for this release or playlist. If set it overrides the `coverImage`.
 - `itemCoverImage` is a child of the `mediaList` array and represents per track/item images to be shown only when that item is playing. If set it overrides both `coverImage` and `localCoverImage`. 
 - All of these are optional
-- See `02 standard.md` section `Supported image formats` for more information about acceptable image formats and the role of thumbnails
+- See `02 standard.md` section 1.25 Supported image formats for more information about acceptable image formats and the role of thumbnails
 - Note regarding thumbnails: only the original image NOT thumbnails is linked in the metadata file.
-	- The presence of thumbnails or not is defined by the actual thumbnail image file presence in the `/thumbnails` subfolder using naming conventions as defined in `02 standard.md`. Players SHOULD also check `/Thumbnails` if thumbnails are not found.
+	- The presence of thumbnails or not is defined by the actual thumbnail image file presence in the `/thumbnails` subfolder using naming conventions as defined in `02 standard.md` section 1.25. Players SHOULD also check `/Thumbnails` if thumbnails are not found.
 - Small design note why isn't the `coverImage` object here just the array itself? To support future expansion of this object if we add moving cover images or some other more complex definition of multiple image slideshow behaviour etc. 
 
 Structure
@@ -506,12 +506,12 @@ coverImage (object)
 		- The filename of the primary cover image for searching in the current release folder
 		- This should be checked first and if not present web capable players and media management should then query the `imageWebURL` to find the image (after checking with the user that online access is ok).  
 			- If an image is downloaded it should be placed in the library folder and the `imageLocalFilename` should be written for future. 
-		- If thumbnails are available they should be in `/thumbnails` relative path off this image as per `02 standard.md`
+		- If thumbnails are available they should be in `/thumbnails` relative path off this image as per `02 standard.md` section 1.25
 	- `imageWebURL`
 		- Required
 			- either this or `imageLocalFilename` is required, otherwise this element of the `images` array is not valid and should be ignored
 		- The web URL of the primaryCoverImage where it should be available for direct download
-		- If thumbnails are available they should be in `/thumbnails` relative path off this URL as per `02 standard.md`
+		- If thumbnails are available they should be in `/thumbnails` relative path off this URL as per `02 standard.md` section 1.25
 		- This property generally should not be set in the `localCoverImage` object as in principle the user would drag in images from their local file system they would never be web sources, so `imageLocalFilename` would always be set. 
 
 ##### `isImageOfNoubin` (boolean)
@@ -585,7 +585,7 @@ Structure
 	- This .noudata file represents a dynamic playlist
 	- Use this string to conduct a search of the media library and load the results as a playlist
 	- Respect other `localPlaybackData` settings notably the `shuffle` property
-- See Dynamic Playlists in definitions section of `02 standard.md`
+- See section 1.27 Dynamic Playlist in `02 standard.md`
 
 `userNotes` is defined below
 
@@ -682,7 +682,7 @@ mediaList (array)
 		- then the player/media management software unites those media files with the original metadata to create a `_<release>.noudata`
 		- so the role of `uniteData` is to contain the expected information about a media item needed for the `unite` operation (Plus also `mediaTitle` from the level above)
 		- OR if it's a free release `uniteData` contains the URL where the media file can be directly downloaded
-			- For more about this see `02 standard.md` section UNIFYING MEDIA FILES WITH WEB RELEASE DATA FOR INCLUSION IN A LOCAL MEDIA LIBRARY 
+			- For more about this see `02 standard.md` section 4.7 UNIFYING MEDIA FILES WITH WEB RELEASE DATA FOR INCLUSION IN A LOCAL MEDIA LIBRARY 
 	- Answer:
 		- `uniteData` is required in `web.noudata` or any `noudata` file that a player/media management app is going to try and `unite` 
 		- `uniteData` is not required once a `.noudata` file has accurate `localFilePaths` values for the respective item 
@@ -704,7 +704,7 @@ mediaList (array)
 	- But if not present this media item can't be played, a `unite` operation must be performed first.  (See `uniteData` above)
 - an array of relative paths to the media files
 	- Note all files are intended to be the SAME MEDIA, this is for e.g. when a download came with files in multiple qualities/file types (E.g. MP3 and FLAC)
-	- Normally the Player selects the highest quality file it can play (see Playback section of `02 standard.md`)
+	- Normally the Player selects the highest quality file it can play (see section 3.3 PLAYBACK FUNCTIONS of `02 standard.md`)
 	- Unless the user overrode that see `overridePlaySpecificAlternate` property of `itemLocalPlaybackData` 
 - entries should include extension
 - e.g. "01 - Sweet Intro.mp3"
@@ -720,7 +720,7 @@ mediaList (array)
 	- `mediaTitle` is required for all other `.noudata` files with multiple media items 
 - It's the title of the song/track/chapter etc that should display in the player
 	- Note the above rules mean that for audiobooks and podcasts which have a single file they probably don't have a `mediaTitle` and the player falls back to showing the `playableItemTitle` (e.g name of the book or podcast episode) 
-- Note also some files may have both a `mediaTitle` AND timestamped chapter names etc which Players should also display. See `02 standard.md` section `REFERENCE COMBINING TITLE INFORMATION`
+- Note also some files may have both a `mediaTitle` AND timestamped chapter names etc which Players should also display. See `02 standard.md` section 4.10 REFERENCE COMBINING TITLE INFORMATION
 
 The objects `itemCredits`,  `itemUserNotes` and `itemCoverImage` are defined above. 
 
@@ -750,7 +750,7 @@ The objects `itemCredits`,  `itemUserNotes` and `itemCoverImage` are defined abo
 		- Usecase is items that weren't categorised properly and not captured appropriately in the resume function defaults.
 			- e.g. a user has a comedy album which was released on a music storefront as an album with multiple tracks even though actual content is long standup comedy items. The user does actually want this release to resume playback when they return to it, even though they don't normally want music to resume playback. 
 	- `useSpecificAlternate` (integer: min 1) 
-		- Optional, if omitted Player chooses which media file to play (see Playback section of `02 standard.md`)
+		- Optional, if omitted Player chooses which media file to play (see section 3.3 PLAYBACK FUNCTIONS of `02 standard.md`)
 		- If present this is the index the user has chosen of the media file alternate that should always be played. 
 		- This is 1-INDEXED so 1 is the first item in the array. 0 is invalid. 
 
@@ -854,7 +854,7 @@ cueLists (array)
 	- `startTime` (string: Noubin Lazy Timestamp HH:MM:SS.mmm)
 		- Required for this to be a valid `cues` array element
 		- The time counting from the start of the media file that this cue starts
-		- See `02 Standard.md` for more info about the timestamp format
+		- See `02 standard.md` section 5 NOUBIN LAZY TIMESTAMP FORMAT for more info about the timestamp format
 		- This `cues` element is invalid if `startTime` is 
 		  - greater than the media item length 
 		  - greater than the `endTime` for this `cues` element
@@ -862,7 +862,7 @@ cueLists (array)
 	- `endTime` (string: Noubin Lazy Timestamp HH:MM:SS.mmm)
 		- Optional, if omitted assume the next `startTime` or the end of the track is the `endTime` for this cue
 		- Time counted from the start of this media file until this cue end
-		- See `02 Standard.md` for more info about the timestamp format
+		- See `02 standard.md` section 5 NOUBIN LAZY TIMESTAMP FORMAT for more info about the timestamp format
 		- This `cues` element is invalid if `endTime` is greater than the media item length 
 	- `cueTextSpans` (array)
 		- Required for this to be a valid `cues` array element

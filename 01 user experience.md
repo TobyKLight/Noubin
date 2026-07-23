@@ -20,7 +20,7 @@ A) When a user taps a Noubin on a Noubin Player
 B) When a user taps a Noubin on a general computing device (phone/computer) without a Software Noubin Player 
 - The Noubin URL should be opened by the web browser which presents the release metadata and links as a normal web page 
 
-*Note that Software Noubin Players may only function correctly when they have focus and can intercept NFC tap data. OS restrictions with deep linking may prevent them intercepting Noubin links when they don't have focus, in which case the fallback behaviour B will occur. (See ADDENDUM 1 of the standard technical document)*
+*Note that Software Noubin Players may only function correctly when they have focus and can intercept NFC tap data. OS restrictions with deep linking may prevent them intercepting Noubin links when they don't have focus, in which case the fallback behaviour B will occur. (See ADDENDUM1 of `02 standard.md`)*
 
 
 #### LOADING MEDIA EXPERIENCE

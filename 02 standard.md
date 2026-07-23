@@ -42,12 +42,12 @@ When are End Users also Artists?
 ##### 1.6 Noubin
 - A physical object 
 - The object MUST contain an NFC forum type 2 or type 4 tag.
-- NFC tags produced by artists MUST be encoded with a URL that follows the NOUBIN URL specifications in this document
+- NFC tags produced by artists MUST be encoded with a URL that follows section 2 NOUBIN URL AND LINKHOST SPECIFICATIONS
 	- The NFC tag MAY be encoded by the end user with plain text, this can only be used to link to media in their local library. 
 - The objects physical design and materials MUST NOT prevent the NFC tag from functioning
 	- e.g. NFC sticker tags typically do not function when stuck directly to metal 
 - The NFC tag SHOULD be rewritable, this gives end-users maximum DIY flexibility. 
-- See ADDENDUM 2 for notes about use cases for non-rewritable tags and type 4 tags. 
+- See ADDENDUM2 for notes about use cases for non-rewritable tags and type 4 tags. 
 
 ##### 1.7 Official / Original / Genuine Noubin
 - A Noubin sold by an artist can be called an "Official Noubin" of the artist.
@@ -67,12 +67,12 @@ When are End Users also Artists?
 
 ##### 1.9 Noubin Player
 - A term encompassing both Hardware Noubin Players and Software Noubin Players
-- All Noubin Players SHALL have at least the functionality laid out in NOUBIN PLAYER  SPECIFICATIONS in this document
+- All Noubin Players SHALL have at least the functionality laid out in section 3 NOUBIN PLAYER SPECIFICATIONS
 
 ##### 1.10 Hardware Noubin Player
 - A standalone device that is not a general purpose computing device (e.g. a phone/laptop) 
 - The device MUST have an NFC reader capable of reading NFC forum type 2 and type 4 tags
-- The device MAY be capable of connecting to the internet (See Web Capable Noubin Player)
+- The device MAY be capable of connecting to the internet (see section 1.12 Web Capable Noubin Player)
 
 ##### 1.11 Software Noubin Player 
 - A software application ("app") running on a general purpose computing device (e.g. a phone/laptop) 
@@ -88,21 +88,21 @@ When are End Users also Artists?
 
 ##### 1.13 Noubin Media Library
 - A folder containing folders, media files and metadata
-- It MUST follow the NOUBIN MEDIA LIBRARY SPECIFICATIONS in this document
+- It MUST follow section 4 NOUBIN MEDIA LIBRARY SPECIFICATIONS
 - Although note it's a pretty forgiving specification organisation wise, players will cope with chaotic libraries. 
 
 ##### 1.14 Noubin Media Library Management Software
 - A dedicated app for managing Noubin media libraries and metadata
 - It does not have to also be a Noubin Player (e.g. you double click a media file and it opens in external player app)
-- It MUST follow the NOUBIN MEDIA LIBRARY SPECIFICATIONS in this document
+- It MUST follow section 4 NOUBIN MEDIA LIBRARY SPECIFICATIONS
 
 ##### 1.15 Noubin Key
 - The string written into a Noubin NFC tag's first NDEF record that directs a Noubin Player to a Playable Item as defined by a `.noudata` file
 	- In plain english this is the text you write into an NFC tag that is then matched to an album/song/playlist etc. 
-- The raw noubin key read from the NFC tag is normalised according to the procedures in section 6 NOUBIN NDEF DATA TRANSFORMS, then compared to `noubinKeyNormalised` value of playable items in the media library. 
+- The raw noubin key read from the NFC tag is normalised according to the procedures in section 6.2 Noubin Key Normalisation, then compared to `noubinKeyNormalised` value of playable items in the media library. 
 - The Noubin Key is ideally formatted as either a 
-  - Local Noubin Key, as plain text (using NDEF Text record), which SHOULD follow the format laid out in Local Noubin Key definition below.  
-  - or a Noubin URL (using NDEF URI record), which SHOULD follow the format laid out in Noubin URL definition and standard sections of this document. 
+  - Local Noubin Key, as plain text (using NDEF Text record), which SHOULD follow the format laid out in section 1.16 Local Noubin Key.  
+  - or a Noubin URL (using NDEF URI record), which SHOULD follow the format laid out in section 1.17 Noubin URL and section 2 NOUBIN URL AND LINKHOST SPECIFICATIONS. 
 - However if the Noubin Key is not formatted to either of those definitions, but after normalisation still matches a `noubinKeyNormalised` of a playable item in the media library it MUST trigger that item. 
 
 
@@ -121,20 +121,20 @@ When are End Users also Artists?
 - A full hyperlink accessible on the internet — a complete URL using `https`, 
 - Eg `https://domain.com/noubin/artist/album` 
 - Intended to be both stored in a Noubin NFC tag (as the Noubin Key when the tag uses a URI record) and hosted at a linkhost
-- Noubin URLs SHOULD be well formatted: use `https`, the path section SHOULD end with a trailing slash pointing at the release folder, and follow the NOUBIN URL SPECIFICATIONS in this document
+- Noubin URLs SHOULD be well formatted: use `https`, the path section SHOULD end with a trailing slash pointing at the release folder, and follow section 2 NOUBIN URL AND LINKHOST SPECIFICATIONS
 - When accessed by a browser the Noubin URL returns a regular web page 
-- When accessed by a Noubin Player it returns metadata readable by the player (*at a slightly different fetch URL — see section 6 NOUBIN NDEF DATA TRANSFORMS*)
+- When accessed by a Noubin Player it returns metadata readable by the player (*at a slightly different fetch URL — see section 6.3 Noubin URL Normalisation*)
 - At the Noubin URL there MAY further be a link to directly download media files, useful for an artist to distribute e.g. mixtapes or music they wish to release for free. 
 - At the Noubin URL there MAY be links to purchase/stream media
-	- If the music is available for purchase one of the digital platforms linked MUST offer DRM free media for the user to purchase indefinitely in the Supported Media Formats (see below)
+	- If the music is available for purchase one of the digital platforms linked MUST offer DRM free media for the user to purchase indefinitely in the Supported Media Formats (see sections 1.23 and 1.24)
 - The Noubin URL MAY contain other links as the artist wishes e.g. to website, merch, social media etc.
-- See section 6 NOUBIN NDEF DATA TRANSFORMS for how players normalize a Noubin URL when fetching `web.noudata` over the internet
+- See section 6.3 Noubin URL Normalisation for how players normalize a Noubin URL when fetching `web.noudata` over the internet
 
 ##### 1.18 Noubin Linkhost
 - A web server that hosts one or more NOUBIN URLs
-- It MUST serve them as per the NOUBIN URL AND LINKHOST SPECIFICATIONS in this document 
+- It MUST serve them as per section 2 NOUBIN URL AND LINKHOST SPECIFICATIONS 
 - This can be the artists own website, publishers website or any site
-- To be clear any site serving Noubin URLS as per the Noubin URL specication is a linkhost. 
+- To be clear any site serving Noubin URLS as per section 2 NOUBIN URL AND LINKHOST SPECIFICATIONS is a linkhost. 
 
 ##### 1.19 Dedicated Noubin Linkhost
 - A website whose main function is to host Noubin URLs
@@ -143,7 +143,7 @@ When are End Users also Artists?
 ##### 1.20 Noudata Metadata file
 - Each Noudata file contains metadata and represents a Playable Item (which can be a single track or multiple tracks), and optionally a key string to enable it to be linked to a Noubin
 - Noudata metadata files MUST end with the extension `.noudata`
-- Noudata files MUST be created, named and organised based on NOUBIN URL SPECIFICATIONS and NOUBIN MEDIA LIBRARY SPECIFICATIONS in this document.  
+- Noudata files MUST be created, named and organised based on section 2 NOUBIN URL AND LINKHOST SPECIFICATIONS and section 4 NOUBIN MEDIA LIBRARY SPECIFICATIONS.  
 - Noudata file content MUST be encoded with JSON and follow the Noubin Metadata format, defined in `03 metadata-base.md` and its extensions.
 - Note the SAME metadata format is both employed on the internet to provide information about media and where to purchase it AND then locally on players the same data is used and extended to provide location of actual downloaded media to play it. 
 	- This addresses an issue with current music distribution reality that audio file formats have different embedded metadata standards, plus distribution services and release platforms manipulate and present metadata differently.
@@ -280,7 +280,7 @@ At the Noubin URL folder there MUST be two items containing the data above
 
 In the Noubin URL folder other data MAY be hosted including e.g. album art that is linked in the HTML/metadata files.
 
-Linkhosts SHOULD host cover images and their thumbnail tiers alongside `web.noudata` on the static file server. Thumbnails MUST be in a `/thumbnails` subfolder next to each original image file, using the naming conventions in Supported image formats (section 1). Players fetching a release over the web derive thumbnail URLs from the image path referenced in `web.noudata` — there is no separate thumbnail URL in the metadata.
+Linkhosts SHOULD host cover images and their thumbnail tiers alongside `web.noudata` on the static file server. Thumbnails MUST be in a `/thumbnails` subfolder next to each original image file, using the naming conventions in section 1.25 Supported image formats. Players fetching a release over the web derive thumbnail URLs from the image path referenced in `web.noudata` — there is no separate thumbnail URL in the metadata.
 
 Example folder layout at `https://domain.com/noubin/artist/release/`: (For a static web server)
 
@@ -347,14 +347,14 @@ Unless stated explicitly all functionality in this section applies to both Hardw
 #### 3.1 MINIMUM FUNCTIONS OVERVIEW
 
 A Noubin Player MUST
-- Read and write NDEF data NFC Forum type 2 and type 4 tags. > see NFC FUNCTIONS
+- Read and write NDEF data NFC Forum type 2 and type 4 tags. > see section 3.2 NFC FUNCTIONS
 - Play audio out via a speaker, line out, headphones, bluetooth etc
-- Support the MINIMUM SUPPORTED MEDIA FORMATS as listed in the definitions section of this document. > see PLAYBACK FUNCTIONS
-- At least support decoding and playback of stereo audio files up to 48kHz sample rate and 16-bit depth. > see PLAYBACK FUNCTIONS
+- Support the MINIMUM SUPPORTED MEDIA FORMATS as listed in section 1.23. > see section 3.3 PLAYBACK FUNCTIONS
+- At least support decoding and playback of stereo audio files up to 48kHz sample rate and 16-bit depth. > see section 3.3 PLAYBACK FUNCTIONS
 - Allow a user to select and play a playable item that is not yet associated with a Noubin
-- Allow a user to select a playable item that is not yet associated with a Noubin and associate it with a Noubin NFC tag (Because the Noubin Player might be the only NFC reader the user has access to) > see NFC FUNCTIONS and MEDIA LIBRARY FUNCTIONS
-- Have an interface where the user can import media to internal storage OR support inserting of removable media already formatted as a Noubin Media Library > see MEDIA LIBRARY FUNCTIONS
-- Read and Write Noubin Media Library format > see MEDIA LIBRARY FUNCTIONS
+- Allow a user to select a playable item that is not yet associated with a Noubin and associate it with a Noubin NFC tag (Because the Noubin Player might be the only NFC reader the user has access to) > see sections 3.2 NFC FUNCTIONS and 3.4 MEDIA LIBRARY FUNCTIONS
+- Have an interface where the user can import media to internal storage OR support inserting of removable media already formatted as a Noubin Media Library > see section 3.4 MEDIA LIBRARY FUNCTIONS
+- Read and Write Noubin Media Library format > see section 3.4 MEDIA LIBRARY FUNCTIONS
 
 A Noubin Player MUST NOT crash or block playback due to unrecognised or poorly formatted `.noudata` files. Particularly when encountering unknown property names or uknnown enum values. This is because the standard may be extended in future so players must fail gracefully if they encounter unsupported metadata. 
 
@@ -367,14 +367,14 @@ Which means a minimal `.noudata` file should be playable as long as it contains:
 
 
 Noubin Players MAY
-- Support the OPTIONAL SUPPORTED MEDIA FORMATS as listed in the definitions section of this document. > see PLAYBACK FUNCTIONS
-- Support complete media library management > see MEDIA LIBRARY FUNCTIONS
-- Have web capability > see WEB FUNCTIONS
-- Support displaying cover images > see Supported Image formats in Definitions
+- Support the OPTIONAL SUPPORTED MEDIA FORMATS as listed in section 1.24. > see section 3.3 PLAYBACK FUNCTIONS
+- Support complete media library management > see section 3.4 MEDIA LIBRARY FUNCTIONS
+- Have web capability > see section 3.5 WEB FUNCTIONS
+- Support displaying cover images > see section 1.25 Supported image formats
 	- Note players may support only a certain tier of thumbnails and if these aren't available in the media library display no image.
 	- Although better UX is for the import process to generate the thumbnails if the player has the performance to do this. 
 - Support searching for items (may be impossible on e.g. extremely minimal player with no UI)
-- Support saving searches as 'dynamic playlists' so that a user can tap a Noubin to effectively search for all songs by artist, all songs with a genre etc. See Dynamic Playlists below and the `searchString` property in `03 metadata-base.md`
+- Support saving searches as 'dynamic playlists' so that a user can tap a Noubin to effectively search for all songs by artist, all songs with a genre etc. See section 3.7 DYNAMIC PLAYLISTS and the `searchString` property in `03 metadata-base.md`
 - Support user categorisation and ratings of content and searching by these properties
 - Support using cue list data to provide users with time annotated functions for e.g. navigating chapters in audiobooks, displaying lyrics / transcript etc. For accessibility this is highly recommended but won't make sense on a minimal player without a screen. 
 	- There can be multiple cue lists (e.g. in different languages) so Players should provide a way to activate/deactivate these. 
@@ -394,7 +394,7 @@ Whilst the main functionality descriptions are in this document there is some sp
 	- This is to prevent the case that the user removes the NFC tag before the read is complete, leading to partial data and key string mismatches. 
 
 - Then there are three steps, a player MUST always do these in this order (local first principle) 
-- 1. The contents MUST initially be parsed to see if they match an entry in the local library for playback, see section 6 NOUBIN NDEF DATA TRANSFORMS (Noubin Key Normalisation). If this fails to locate playable media then go to step 2. 
+- 1. The contents MUST initially be parsed to see if they match an entry in the local library for playback, see section 6.2 Noubin Key Normalisation. If this fails to locate playable media then go to step 2. 
 	- If there are multiple matching entries (same `noubinKeyNormalised`) then the developer can decide what to do (e.g. play the first match, offer the user a choice etc)
 	- Nice to have functionality is a warning to the user this is what has happened and even an offer to resolve it. 
 - 2. Fallback direct internet access. If all of the following are true:
@@ -402,16 +402,16 @@ Whilst the main functionality descriptions are in this document there is some sp
 	- The device currently has an internet connection 
 	- The device has an appropriate user interface for communicating info from Noubin URLs to the user
 	- The NDEF record is a valid URL 
-- Then proceed to the behaviour in NOUBIN PLAYER WEB FUNCTIONS
+- Then proceed to the behaviour in section 3.5 WEB FUNCTIONS
 - 3. Fallback indirect internet access. If the following is true
 	- The NDEF record is a valid URL 
 	- The player is a hardware player
-- Then the player SHOULD proceed to PASSING A URL TO A MOBILE DEVICE
+- Then the player SHOULD proceed to section 3.6 PASSING A URL TO A MOBILE DEVICE
 - Otherwise if no fallbacks are possible the player SHOULD show an error with a user-readable message
 
 - Players MUST support writing NFC tags
 	- Even a bare-bones player must support this, why? 
-	- Because players MUST support associating a Noubin NFC tag with media. See section MEDIA LIBRARY FUNCTIONS (of players)
+	- Because players MUST support associating a Noubin NFC tag with media. See section 3.4 MEDIA LIBRARY FUNCTIONS (of players)
 
 
 ##### 3.2.1 Additional Performance Requirements for Hardware Noubin Players only: 
@@ -428,8 +428,8 @@ Whilst the main functionality descriptions are in this document there is some sp
 	- There is the possibility of using custom metadata extensions so the user can set unique preferences for individual Noubins. see `03 metadata-base.md` 
 
 
-- Players MUST support the MINIMUM SUPPORTED MEDIA FORMATS as listed in the definitions section of this document.
-- Players MAY support the OPTIONAL SUPPORTED MEDIA FORMATS as listed in the definitions section of this document. (See QandA.md for background as to why)
+- Players MUST support the MINIMUM SUPPORTED MEDIA FORMATS as listed in section 1.23.
+- Players MAY support the OPTIONAL SUPPORTED MEDIA FORMATS as listed in section 1.24. (See QandA.md for background as to why)
 
 - Players MUST at least support decoding and playback of stereo audio files up to 48kHz sample rate and 16-bit depth.
 	- Note that mono players are allowed (e.g. a hardware player with one speaker), they should still support stereo files and do a mixdown to mono. 
@@ -447,14 +447,14 @@ Whilst the main functionality descriptions are in this document there is some sp
 
 #### 3.4 MEDIA LIBRARY FUNCTIONS (of players)
 
-- If a Player has media library functions it MUST implement the NOUBIN MEDIA LIBRARY SPECIFICATION in section 4 of this document for all touchpoints where the user will interact with media and metadata files. E.g. merging and exporting media from web interface, removable drive, backup file etc. 
+- If a Player has media library functions it MUST implement section 4 NOUBIN MEDIA LIBRARY SPECIFICATIONS for all touchpoints where the user will interact with media and metadata files. E.g. merging and exporting media from web interface, removable drive, backup file etc. 
 	- This means media libraries are transferrable between Noubin Players of all kinds. Turn up at your friends house and share your music to their player. 
-	- Note for internal only storage, players may use a different format if the developer wishes. But any export function must produce an export formatted according to the NOUBIN MEDIA LIBRARY SPECIFICATION.
+	- Note for internal only storage, players may use a different format if the developer wishes. But any export function must produce an export formatted according to section 4 NOUBIN MEDIA LIBRARY SPECIFICATIONS.
 - Players MUST implement a function where a user can associate a Noubin with a playable item
-	- This should create/set appropriate cross-compatible `.noudata` metadata in the media library, including `noubinKey` and `noubinKeyNormalised` (see section 6 and UNIFYING MEDIA FILES WITH WEB RELEASE DATA FOR INCLUSION IN A LOCAL MEDIA LIBRARY)
+	- This should create/set appropriate cross-compatible `.noudata` metadata in the media library, including `noubinKey` and `noubinKeyNormalised` (see sections 6.1–6.2 and section 4.7 UNIFYING MEDIA FILES WITH WEB RELEASE DATA FOR INCLUSION IN A LOCAL MEDIA LIBRARY)
 	- This means if a Noubin has an NFC tag with blank NDEF record the player must create one.
 	- Or if the user provide an NFC tag that already has a first NDEF record it must be ovewrriten. 
-	- See section 1 DEFINITIONS entry for for Local Noubin Key for reccomended format
+	- See section 1.16 Local Noubin Key for recommended format
 	- Avoid collisions with existing `noubinKeyNormalised` values in the library by appending a random string. 
 	- Note the player will have to adapt to the available capacity of the NFC tag, some are as low as 48 bytes and may not fit a string with a long or complicated `playableItemTitle`. So the string should not be generated or set in the `.noudata` file until the moment the NFC tag capacity is confirmed. 
 - Players MAY implement further media and tag management functions including
@@ -488,7 +488,7 @@ If the player supports web functions then all the following "MUST" and "SHOULD" 
 	- Bear in mind we can't prevent malicious linkhosts from tracking when links are accessed. We don't want to give them a view into every time the user plays the media. 
 	- Once the user has the release locally then there MUST NOT be any automated checks from the player looking for e.g. updated cover art. If such a check is offered the end-user must consent to web access. 
 	- Manually initiated checks by the user are OK as long as it's clear to the user this involves web access. 
-- If the player can download the release it MUST use the UNIFYING MEDIA FILES WITH WEB RELEASE DATA FOR INCLUSION IN A LOCAL MEDIA LIBRARY procedure outlined in this document. This attaches the canonical web metadata, media files and associated content (e.g. images) together in the library so no further web access is required for future taps.  
+- If the player can download the release it MUST use the section 4.7 UNIFYING MEDIA FILES WITH WEB RELEASE DATA FOR INCLUSION IN A LOCAL MEDIA LIBRARY procedure. This attaches the canonical web metadata, media files and associated content (e.g. images) together in the library so no further web access is required for future taps.  
 - All URLs MUST become `https` if it's `http`
 - Note that it's possible for bad actors or malfunctioning web servers to put malicious payloads or 5GB files at the Noubin URL. 
 - The player MUST implement appropriate security features for a web device including
@@ -504,26 +504,26 @@ If the player supports web functions then all the following "MUST" and "SHOULD" 
 
 **Accessing Noubin URLs**
 - The Noubin URL by default points to a web page for opening in a normal browser (fallback if tapped on a phone without a player app)
-- To fetch `web.noudata`, the player MUST first apply **Noubin URL Normalisation** to the Noubin Key from the tag (see section 6 NOUBIN NDEF DATA TRANSFORMS), then perform a HTTPS GET request on the resulting Canonical Metadata URL
+- To fetch `web.noudata`, the player MUST first apply **Noubin URL Normalisation** to the Noubin Key from the tag (see section 6.3), then perform a HTTPS GET request on the resulting Canonical Metadata URL
 - If the GET request returns 200 success the player MUST attempt to parse the payload as JSON following the schema in `03 metadata-base.md` 
 - The player MUST first show the user the overview of what the expected media content is as listed in the metadata. E.g. name of media and track listing if available.
 - The player MAY fetch cover art from the same linkhost without a further consent request. 
-- If the metadata includes direct media download links (for free content) and the player is capable of direct downloading then the player MUST offer downloading this content as the first action to the user before release platforms. see DIRECT MEDIA DOWNLOADING
+- If the metadata includes direct media download links (for free content) and the player is capable of direct downloading then the player MUST offer downloading this content as the first action to the user before release platforms. see Direct Media Downloading below in this section
 - Then the user can use the UI to move to the release platforms list.
 - The player MUST show platforms in the order that the Artist put them in the metadata file with the appropriate call to action text (see `03 metadata-base.md`)
-- If the user selects a platform for purchasing/streaming etc that the player cannot deal with directly (which will be all of them until stores support authentication by players) then the link should be passed to the users device following the PASSING A URL TO A MOBILE DEVICE section 
-- If a Noubin URL web request fails on a hardware player the player MUST display the error message with an option like "open on your device" to offer that the URL can be passed to a mobile device see PASSING A URL TO A MOBILE DEVICE
+- If the user selects a platform for purchasing/streaming etc that the player cannot deal with directly (which will be all of them until stores support authentication by players) then the link should be passed to the users device following section 3.6 PASSING A URL TO A MOBILE DEVICE 
+- If a Noubin URL web request fails on a hardware player the player MUST display the error message with an option like "open on your device" to offer that the URL can be passed to a mobile device see section 3.6 PASSING A URL TO A MOBILE DEVICE
 	- Note this won't always make sense to open on your own device. 404 errors are likely to get the same result on a mobile device but it's up to the user to decide. 
-- If a 404 response includes a JSON formatted human readable error message (see Noubin URL and Linkhost specifications above) than the player SHOULD display it. 
+- If a 404 response includes a JSON formatted human readable error message (see section 2.1 LINKHOSTS and 404) than the player SHOULD display it. 
 
 **Direct Media Downloading**
 - If media files are available for direct download the player MUST prompt the user if they wish to download, and show the user the URL that will be accessed (or list of URLs, the user can consent at once to all)
 - If the user agrees the media player MUST perform a HTTPS GET request to the appropriate URL and show download status in the interface
-- If the download completes successfully the player MUST put the media in the users library following the organisation principles in NOUBIN MEDIA LIBRARY SPECIFICATIONS in this document, including the UNIFYING MEDIA FILES WITH WEB RELEASE DATA FOR INCLUSION IN A LOCAL MEDIA LIBRARY procedure 
-- The player MUST create a `.noudata` file named and organised as per the NOUBIN MEDIA LIBRARY SPECIFICATIONS 
+- If the download completes successfully the player MUST put the media in the users library following the organisation principles in section 4 NOUBIN MEDIA LIBRARY SPECIFICATIONS, including the section 4.7 procedure 
+- The player MUST create a `.noudata` file named and organised as per section 4 NOUBIN MEDIA LIBRARY SPECIFICATIONS 
 	- This file MUST be based on the `web.noudata` data
-	- This file MUST now be named according to the NOUBIN MEDIA LIBRARY SPECIFICATIONS
-	- The file MUST be appended with information about the actual downloaded local media files, i.e. set the `localFilePaths` property for each item. See UNIFYING MEDIA FILES WITH WEB RELEASE DATA FOR INCLUSION IN A LOCAL MEDIA LIBRARY 
+	- This file MUST now be named according to section 4 NOUBIN MEDIA LIBRARY SPECIFICATIONS
+	- The file MUST be appended with information about the actual downloaded local media files, i.e. set the `localFilePaths` property for each item. See section 4.7 UNIFYING MEDIA FILES WITH WEB RELEASE DATA FOR INCLUSION IN A LOCAL MEDIA LIBRARY 
 
 NOTE
 - In a future version of this standard it's anticipated that Noubin Players will be able to extend web functionality to negotiate with stores directly, particularly for identifying media that the user already owns and downloading it to the local library. 
@@ -541,7 +541,7 @@ Procedure for hardware players to transfer a URL to a device that has a browser.
 
 #### 3.7 DYNAMIC PLAYLISTS
 
-Players MAY support dynamic playlists (see Dynamic Playlist in section 1 Definitions and `searchString` in `03 metadata-base.md`).
+Players MAY support dynamic playlists (see section 1.27 Dynamic Playlist and `searchString` in `03 metadata-base.md`).
 
 A dynamic playlist is a `.noudata` playable item where:
 - `localPlaybackData.searchString` is set to a library search query
@@ -562,7 +562,7 @@ When the user taps the associated Noubin, the player MUST run the search against
 	- Manufacturers MUST ensure this is very clear in marketing materials so that users know if they also have to provide their own removable storage device. 
 
 - Players MUST support exFAT and FAT32 as the file system formats for removable storage read and write. exFAT is preferred.
-	- Tiny microcontroller based players who will struggle with indexing large media libraries (particularly on exFAT) are reccomended to make available media management software so the user can pre-index the media on their desktop computer. See PLAYER DATABASES AND METADATA FILES below. 
+	- Tiny microcontroller based players who will struggle with indexing large media libraries (particularly on exFAT) are reccomended to make available media management software so the user can pre-index the media on their desktop computer. See section 4.6 PLAYER DATABASES AND METADATA FILES. 
 
 - When Noubin player or media management software puts a users media library on a removable storage device it should check if the file system format is supported, and if not warn the user that it may not be readable by Players otherwise. 
 	- To be clear a player does not have to provide drive formatting capability itself, it can direct users to common utilities for this.
@@ -646,7 +646,7 @@ When the user taps the associated Noubin, the player MUST run the search against
 		- Playlist `.noudata` files may contain `localCoverImage` (under `localPlaybackData`) to give a playlist a cover image
 	- NOTE: what about `web.noudata` files? This naming is only used at Noubin URLS to contain data provided by an artist that isn't yet associated with local files.
 		- So `web.noudata` files generally shouldn't appear in a media library
-		- For more information see the Noubin URL specifications above and the section below UNIFYING MEDIA FILES WITH WEB RELEASE DATA FOR INCLUSION IN A LOCAL MEDIA LIBRARY 
+		- For more information see section 2 NOUBIN URL AND LINKHOST SPECIFICATIONS and section 4.7 UNIFYING MEDIA FILES WITH WEB RELEASE DATA FOR INCLUSION IN A LOCAL MEDIA LIBRARY 
 
 - Edge case for the single `.noudata` files: what if a release has a single track, and the release and the track have different titles? Do you make a `_<release>.noudata` or a single track `<trackname>.noudata`?
 	- In this case the single track rule applies: All `.noudata` files that only contain a single track take the same name as the media file filename. 
@@ -741,7 +741,7 @@ In the chaotic example we also have multiple `.noudata` files associated with si
 	- After initial scan it's recommended to use lazy scanning methods to only look for changes
 	- The player SHOULD index `noubinKeyNormalised` values from `.noudata` files for fast NFC tap lookup
 - Developers of players can choose their own database format as best suits their player architecture and performance requirements. 
-	- If saved in the media library the database MUST be saved to a folder whose name starts with a period, named after the player: `.<player>/` e.g. `.plippa/` (such folders are excluded from regular media scans by rules above in FOLDER ORGANISATION section)
+	- If saved in the media library the database MUST be saved to a folder whose name starts with a period, named after the player: `.<player>/` e.g. `.plippa/` (such folders are excluded from regular media scans by rules in section 4.4 FOLDER ORGANISATION)
 - It's RECCOMENDED that tiny microcontroller based players which will struggle with indexing large media libraries make available media management software to users they can run on their desktop computer which generates the indexed database files in advance. 
 - When media management functions are used that make changes to the database, e.g. editing a playlist, players and media management software MUST also propagate change to the individual `.noudata` metadata files.
 - Players and library media management software MAY scan media files directly for embedded metadata, particularly for creating or augmenting `.noudata` metadata files
@@ -772,11 +772,11 @@ Both media library software and players will be referred to as 'software' here.
 	- When the user wants to associate a Noubin with this media the software should prompt them if they have an official artist Noubin or Noubin URL they wish to use to get official release metadata from the internet. 
 		- Ideally they have the Noubin and can just tap it
 		- Fallback they can manually enter the URL which they could read by tapping the Noubin on their phone and copy / paste / share to a computer without a NFC reader.
-	- The software then follows the procedure from NOUBIN PLAYER WEB FUNCTIONS to access `web.noudata` and associated album art. 
+	- The software then follows the procedure from section 3.5 WEB FUNCTIONS to access `web.noudata` and associated album art. 
 
 - Continuing for Case A and B: 
 	- The software now has `web.noudata` and a set of local media files that are meant to be linked together.
-	- The first thing is the software should check the `playableItemTitle` property and media file names for illegal characters as per Safe file and folder names from the Definitions section of this document. 
+	- The first thing is the software should check the `playableItemTitle` property and media file names for illegal characters as per section 1.26 Safe file and folder names. 
 		- Generate a `playableItemSafeTitle` if required
 		- Rename media files if required
 		- see `03 metadata-base.md` entry for `playableItemSafeTitle` for more information
@@ -788,8 +788,8 @@ Both media library software and players will be referred to as 'software' here.
 	- If matches are not found for track entries in `web.noudata` then prompt the user to allocate remaining media files manually and when relevant show them files mentioned in the release are missing/can't be found.
 	- When all `mediaList` elements from `web.noudata` have at least one `localFilePaths` array entry AND all media files are accounted for the procedure is complete.
 	- The now united metadata is saved as `_<release>.noudata` in the release folder (or `<trackName>.noudata` for a release with a single media item)
-	- The player MUST set `noubinKey` to the literal Noubin Key extracted from the tapped tag's NDEF record (see Extracting the Noubin Key from an NDEF Record in section 6)
-	- The player MUST set `noubinKeyNormalised` by applying Noubin Key Normalisation to that value (see section 6). This SHOULD also be indexed in the player's library database (e.g. a hash table) so future taps can be matched without re-normalising on every read
+	- The player MUST set `noubinKey` to the literal Noubin Key extracted from the tapped tag's NDEF record (see section 6.1 Extracting the `noubinKey` from an NDEF record)
+	- The player MUST set `noubinKeyNormalised` by applying Noubin Key Normalisation to that value (see section 6.2). This SHOULD also be indexed in the player's library database (e.g. a hash table) so future taps can be matched without re-normalising on every read
 	- In case of errors the user should have an interface where they can reassign the linking of files to tracks
 	- If album art is included both in purchased media files and also has been downloaded from the `web.noudata` metadata compare resolution of files and keep the higher resolution one as the primary album art entry.
 		- Rename any non used art and keep it in the folder as e.g. `<albumArt>-alt.png`
@@ -825,7 +825,7 @@ When we have a good implementation in the first software we will explain it here
 
 #### 4.8 IMPORTING IMAGES AND  THUMBNAILS
 
-- When an image is linked in a `.noudata` file (relative or URL) then the player / media management software should check for thumbnails in the `/thumbnails` folder following the naming conventions in `Supported image formats` section of this document (with `/Thumbnails` as a fallback if not found)
+- When an image is linked in a `.noudata` file (relative or URL) then the player / media management software should check for thumbnails in the `/thumbnails` folder following the naming conventions in section 1.25 Supported image formats (with `/Thumbnails` as a fallback if not found)
 - When accessing a release from the web at a Noubin URL, or `merging` it into a library, players and media management software MUST check for and also download/copy thumbnail files relating to an image file, using the `/thumbnails` layout documented in section 2 NOUBIN URL AND LINKHOST SPECIFICATIONS. Save imported thumbnails under `/thumbnails` in the local library.
 - When images are downloaded from the web they should be put in the release folder and the `_<release>.noudata` file should be updated with the now local filenames in each relevant `images[].imageLocalFilename` entry.
 	- Note there are three places in the metadata format where images can potentially be downloaded and should be locally saved once this has occured
@@ -984,20 +984,20 @@ The following values are equivalent:
 This section defines how players interpret data read from Noubin NFC tags.
 
 To recap: 
-- A **Noubin URL** is the full release hyperlink on the internet — a complete URL with `https://`, query parameters, path components, and so on. Noubin URLs SHOULD be well formatted (see section 2), but players apply **Noubin URL Normalisation** when fetching `web.noudata` to cope with minor malformations.
+- A **Noubin URL** is the full release hyperlink on the internet — a complete URL with `https://`, query parameters, path components, and so on. Noubin URLs SHOULD be well formatted (see section 2), but players apply **Noubin URL Normalisation** (section 6.3) when fetching `web.noudata` to cope with minor malformations.
 - A **Noubin Key** is the literal string stored in the tag's NDEF record: either plain text or a Noubin URL This is what the artist (or user) actually wrote to the chip.
 	- Note when it's an NDEF URI the Key is the NDEF URI with the URI prefix byte expanded to a full `http://` or `https://` string, potentially including `www.` also).
 
 
 So then when a Noubin is tapped there are two different procedures that can happen, both start with the same first step
-- `noubinKey` extraction
+- `noubinKey` extraction (section 6.1)
 And then 
-- Noubin Key Normalisation: applied when matching a tap against the local library. Produces the `noubinKeyNormalised` value stored in `.noudata` files during the `unite` operation or when associating a tag manually.
+- Noubin Key Normalisation (section 6.2): applied when matching a tap against the local library. Produces the `noubinKeyNormalised` value stored in `.noudata` files during the `unite` operation or when associating a tag manually.
 If that fails (no local match) AND the `noubinKey` is a URL AND the Noubin player is web capable: it can offer the user to fetch data from the web about this Noubin. 
 IF the user agrees then the extracted `noubinKey` from the first step is normalised in a different procedure
-- Noubin URL Normalisation: applied when players access the internet to fetch `web.noudata`. Turns the Noubin Key into a reliable fetch URL.
+- Noubin URL Normalisation (section 6.3): applied when players access the internet to fetch `web.noudata`. Turns the Noubin Key into a reliable fetch URL.
 
-Both procedures share the same first step (Extracting the Noubin Key from an NDEF record) to get a `noubinKey` 
+Both procedures share the same first step (section 6.1 Extracting the Noubin Key from an NDEF record) to get a `noubinKey` 
 
 #### 6.1 Extracting the `noubinKey` from an NDEF record
 
@@ -1011,7 +1011,7 @@ Both procedures share the same first step (Extracting the Noubin Key from an NDE
 * **For NDEF URI:** 
 	1. The player MUST fully expand the URI payload by resolving the URI Identifier Code byte into its full string prefix (e.g., `0x04` becomes `https://`).
     2. The player MUST decode the fully expanded payload into a UTF-8 string. 
-	3. SPECIAL CASE **`noubin.com` redirect unwrapping (URL Noubin Keys only):** If the Noubin Key is a URL whose host is `noubin.com` or a subdomain of `noubin.com`, AND it contains a `?redirect` query parameter, the player MUST replace the Noubin Key with the URL-decoded value of that parameter (including any query parameters on the decoded URL) before continuing. See ADDENDUM 1.
+	3. SPECIAL CASE **`noubin.com` redirect unwrapping (URL Noubin Keys only):** If the Noubin Key is a URL whose host is `noubin.com` or a subdomain of `noubin.com`, AND it contains a `?redirect` query parameter, the player MUST replace the Noubin Key with the URL-decoded value of that parameter (including any query parameters on the decoded URL) before continuing. See ADDENDUM1.
 		- NOTE `noubin.com` urls that don't contain a `?redirect` query parameter should be left as is and in that case `noubin.com` is treated as a regular linkhost. 
 	- NOTE At this point if there are query parameters or any other URL components beyond host and path (e.g. port numbers, `#` fragments, `;` matrix parameters, userinfo before `@`) this data remains and is included in the `noubinKey`
 	- NOTE Percent-encoded sequences (e.g. `%20`, `%2F`, `%3A`) are also left as-is in the `noubinKey`, whether they appear in the path, query, fragment, or elsewhere. Do not URL-decode the path at this stage. The only decoding in Phase 2 is the special `?redirect=` unwrap in step 3 above, which URL-decodes that parameter's value when replacing the Noubin Key.
@@ -1070,17 +1070,17 @@ Once extracted, the player MUST apply the following transformations in exact ord
 
 The resulting string is the **Normalised Noubin Key**. Players MUST perform a byte-for-byte equality comparison of this value against `noubinKeyNormalised` in the local media library to match to a playable item (see `03 metadata-base.md`).
 
-- If a Normalised Noubin Key is found and linked to valid playable item see PLAYBACK in 3 NOUBIN PLAYER SPECIFICATIONS
-- If not found then return to NFC FUNCTIONS in 3 NOUBIN PLAYER SPECIFICATIONS
+- If a Normalised Noubin Key is found and linked to valid playable item see section 3.3 PLAYBACK FUNCTIONS
+- If not found then return to section 3.2 NFC FUNCTIONS
 - If found but playback cannot start due to e.g. invalid local media file the player MUST give an appropriate error message e.g. ".noudata file found but media not found"
 
 **Notes on Noubin Key Normalisation:**
 - Should Noubin Key normalisation remove `www.`? Yes — see step 5. Other subdomains stay.
-- Should Noubin Key normalisation add a trailing slash? Yes — see step 7. Do **not** strip `index.html` or other filenames here; that is only for HTTP fetch in 6.3. A tag ending in `…/album/index.html` therefore normalises to a different key than `…/album/`.
+- Should Noubin Key normalisation add a trailing slash? Yes — see step 7. Do **not** strip `index.html` or other filenames here; that is only for HTTP fetch in section 6.3. A tag ending in `…/album/index.html` therefore normalises to a different key than `…/album/`.
 - Should non-ASCII letters be lowercased? No — only ASCII `A-Z` → `a-z` (step 1).
 - Should `%2f` in the path be decoded to `/`? No — leave it encoded so it does not invent new path segments (step 6).
 - Should Noubin Key normalisation of `noubin.com` URLS do the special unwrapping procedure if they contain a ?redirect query paramater? YES this MUST happen before Noubin Key Normalisation, otherwise after the query parameters are dumped  `noubin.com` wrapper URLs would all collapse to the same key (e.g. `noubin.com/r/`).
-- Noubin URL Normalisation (below) uses additional path rules for HTTP fetch (including stripping `index.html`). Do not apply those fetch-only rules here.
+- Section 6.3 Noubin URL Normalisation uses additional path rules for HTTP fetch (including stripping `index.html`). Do not apply those fetch-only rules here.
 
 **Noubin Key Normalisation Examples:**
 
@@ -1111,7 +1111,7 @@ Each example shows the **Noubin Key** (after Phase 1–2 extraction, stored as `
 
 #### 6.3 Noubin URL Normalisation
 
-Applied when a web-capable player needs to fetch `web.noudata` from the internet. Input is the Noubin Key extracted from the tag (Phase 1–2 above).
+Applied when a web-capable player needs to fetch `web.noudata` from the internet. Input is the Noubin Key extracted from the tag (section 6.1 Phase 1–2).
 
 The player MUST apply the following in exact order:
 
@@ -1174,7 +1174,7 @@ This is a long one
 	- Hence why today nothing like this is yet implemented in the standard; if there is demand for this it will involve an extension to the standard and the setup of the appropriate infrastructure at `noubin.com`.
 - B) The bigger problem, that we have to think about now, is that centralisation is also a potential issue with playback. If Noubins are encoded with `noubin.com` redirect links but rely on `noubin.com` to really do the redirect, then if `noubin.com` goes down all online noubin activity is halted for all Noubins, even those using linkhosts elsewhere. 
 	- This is also undesirable centralisation and allows the future operators of `noubin.com` to potentially censor and remove links, deactivating online functions of Noubins people already made and bought.
-	- Hence why the special requirement for noubin web activity exist: players MUST unwrap `noubin.com` redirect URLs locally as defined in section 6 NOUBIN NDEF DATA TRANSFORMS (both Noubin Key Normalisation and Noubin URL Normalisation), rather than relying on `noubin.com` to perform the redirect at fetch time.
+	- Hence why the special requirement for noubin web activity exist: players MUST unwrap `noubin.com` redirect URLs locally as defined in sections 6.1, 6.2 and 6.3, rather than relying on `noubin.com` to perform the redirect at fetch time.
 	- Then it doesn't matter if `noubin.com` is up or has removed the redirect, regular players at least will still find the artists intended content. (although it may still be broken for browsers)
 
 # ADDENDUM2 LOCKED TAGS AND TYPE 4 TAG USE CASES
