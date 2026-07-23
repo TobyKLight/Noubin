@@ -487,6 +487,7 @@ coverImage (object)
         |-- imageLocalFilename (string)
         |-- imageWebURL (string: url)
 		|-- isImageOfNoubin (boolean)
+		|-- altText (string)
 
 ```
 
@@ -517,7 +518,11 @@ coverImage (object)
 - optional, if omitted assume FALSE
 - if present indicates this is an image of the Noubin itself
 - useful for displaying to the user in a media library view of associated Noubins, the user may think of their music as attached to object X rather than the typical album cover.
-- Can theoretically be multiple images of the Noubin from e.g. different angles, with/without packaging etc.   
+- Can theoretically be multiple images of the Noubin from e.g. different angles, with/without packaging etc. Assume the first one will be the most prominent used image  
+
+#### `altText` (string)
+- Alt text describing any image
+- Used for both accessibility and improving search results 
 
 ---
 ### `localPlaybackData` (object)
