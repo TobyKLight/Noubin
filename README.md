@@ -1,3 +1,4 @@
+<img width="300" alt="Noubin Logo" src="https://github.com/user-attachments/assets/1da4e295-836d-4135-ba8d-d094ad3b3998" />
 
 # NOUBIN 
 Local-first physical media hyperlink standard, 
