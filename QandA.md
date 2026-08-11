@@ -206,7 +206,7 @@ My background is I'm an interactive artist from Australia, now living in Berlin,
 
 From the side of Now We Make, here's how we make money from this project: 
 - For end users we want to make boutique Noubin players (called Plippas) with open source software 
-- For artists we want to help them make creative Noubins and with hosting the link content (at Plippa.net)
+- For artists we want to help them make creative Noubins and with hosting the link content (at Noubin.com)
 - We aim to have businesses sponsor the standard and our projects related to it
 
 This open standard means we can't build a monopoly on making players, making Noubins or hosting links. Others are welcome and encouraged to do these things and make money from doing them. 
