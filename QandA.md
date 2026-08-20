@@ -1,6 +1,5 @@
 
 ### Standard Design Decisions
-
 #### What's the origin of the name?
 
 Noubin is a portmanteau of 
@@ -15,6 +14,7 @@ Put your music on anything.
 
 See also [ding an sich](https://en.wikipedia.org/wiki/Thing-in-itself).
 
+---
 #### Why do Noubins contain just URLs and not actual media files?
 
 Due to current NFC technology. 
@@ -25,6 +25,7 @@ In turn this means they aren't practically designed to contain much more data th
 
 You could theoretically design a Noubin that has a USB stick in it or find another way to give a user files directly. If there's interest we could look into standardising this as well. To get started for now though Noubin works with existing audio media distribution systems. 
 
+---
 #### Does a Noubin bought new from an artist come with the music files? Or come with a 'download code' to get the files from a storefront? 
 
 For paid content: Unless the artist/retailer explicitly says otherwise (e.g. "Noubin + Download Code") selling a Noubin is just selling a Noubin.
@@ -35,6 +36,7 @@ For freely downloadable content: yes if the Noubin URL is set up properly with t
 
 You have to contact the point of sale from where you bought it. 
 
+---
 #### What happens if I sell a Noubin or buy one second hand? Does it come with the music files?
 
 So probably no, unless the listing explicitly says it comes with the files (which it may do for freely downloadable content). Unfortunately the reality today is most music storefronts don't allow transfer of purchases to another account. 
@@ -51,6 +53,7 @@ What's the difference? So typically when you see an album cover it gives the imp
 
 We want Noubins to feel like the former, objects the artist picked to be a curated part of their media release. 
 
+---
 #### Can Noubins be linked to playlists? 
 
 For end-users YES. Users can link a Noubin to any playable item in their library, including tracks, albums and playlists. End-users can also reassign any Noubin they own to these playable items. 
@@ -59,13 +62,14 @@ For official noubins from Artists: NO, they shouldn't sell Noubins linked to a p
 
 Note however a release be a greatest hits album ,it can be a mixtape, it can be a compilation. So there are ways for Artists to release a Noubin that plays a chosen collection of songs as long as the digital release itself contains those songs.  
 
-
+---
 #### Do Noubins have to be linked to new releases? 
 
 No, an artist can sell an official Noubin for digital media that was released earlier. E.g. releasing the official Noubin now for a 2014 album without re-releasing the album. 
 
 The artist can also re-release the album to go with the Noubin. As long as the Noubin is available separately it doesn't disadvantage the user, the user who has the old digital release can buy just the Noubin and link it to the old files.  
 
+---
 #### Why local first? What about streaming? What about DRM? 
 
 The standard requires that (for paid content) at least one link at a Noubin URL is to a distribution platform where the media can be 
@@ -105,7 +109,7 @@ However also note links are intercepted by Noubin players to check for local fil
 
 Alternatively if the tag is rewritable than an end-user who taps the tag but only to always select the major streaming platform link (that then opens their streaming app), and who never will have a Noubin player, can just rewrite the streaming app link straight into the Noubin NFC tag so it's one action to open their streaming app instead of two. 
 
-
+---
 #### What about file format licencing issues? Why support proprietary audio formats?
 
 Fortunately today in the digital audio media world we are blessed with many good quality open audio formats, and these are widely available at storefronts including: 
@@ -139,6 +143,7 @@ It's a compromise but we think practically it should produce relatively minor fr
 
 If this compromise is not working and users regularly report bad experiences with unplayable content we are open to changing this approach in a future version of the standard.
 
+---
 #### What about videos/films?
 
 The initial Noubin standard is developed with music and audio content in mind. Theoretically in future Noubins could be linked to any kind of digital media. 
@@ -172,7 +177,7 @@ So the Noubin of the Film can actually be the Noubin of the Soundtrack of the Fi
 
 
 
-
+---
 #### I'm an artist concerned about censorship. How can I ensure the online experience of Noubins I make remains available?
 
 If you are concerned about censorship than you can always self-host your Noubin URLs on your own website. 
@@ -183,7 +188,7 @@ The best protection against being deplatformed is to have your media available o
 
 Hopefully soon there will be open source software available that lets you export the `.noudata` files and  matching HTML page for your releases, which will make it easier to self-host them. 
 
-
+---
 ### Collaboration and process
 #### When will the standard reach v1.0 stable?
 
@@ -195,13 +200,14 @@ When those things occur and seems like the system will meet the design goals the
 
 If anyone would like to implement this standard already though I certainly don't want breaking changes to ruin your day, so lets use the github discussions feature to communicate. 
 
-
+---
 ### About the authors and commercial 
 #### Who is behind the standard? 
 
 Hi I'm Toby K from Now We Make. Currently I'm the author and maintainer of the standard.  
 My background is I'm an interactive artist from Australia, now living in Berlin, Germany. And my company Now We Make is an indie software/hardware house based in Berlin.
 
+---
 #### How do you make money? 
 
 From the side of Now We Make, here's how we make money from this project: 
@@ -211,18 +217,21 @@ From the side of Now We Make, here's how we make money from this project:
 
 This open standard means we can't build a monopoly on making players, making Noubins or hosting links. Others are welcome and encouraged to do these things and make money from doing them. 
 
+---
 #### Is this anything to do with NFTs, blockchain or crypto? 
 
 No. The Noubin standard does not use blockchain or NFTs (non fungible tokens). It has nothing to do with crypto currency. 
 
 Note the standard does not prevent individual artists linking to blockchain related things at their Noubin URLs if they wish to. 
 
+---
 #### Are there plans to close the standard or put more restrictive commercial terms in place? 
 
 We plan to keep the standard open. That's our values but it's also the only sane commercial thing to do. If you look at the history of physical media formats even giant companies have a very hard time getting closed standards adopted. 
 
 If it made sense in future we would consider fees for larger businesses in the ecosystem, but given it's an open standard built on other open technology that's only going to work if it's relatively modest fees that bring those companies a lot of value. E.g. Asking companies that want to make officially certified Noubin Players to join a standards association similar to bluetooth. 
 
+---
 #### Why should we trust you? 
 
 Lots of good stuff has been created before than enshittified by companies as they got bigger. It's easy for us to say we don't plan to turn this into a closed standard but why should users and artists trust us? 
