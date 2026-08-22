@@ -37,7 +37,8 @@ ROOT
 |-- noubinKey (string)
 |-- noubinKeyNormalised (string)
 |-- playableItemTitle (string)
-|-- playableItemSafeTitle (string)
+|-- playableItemFolderSafeTitle (string)
+|-- playableItemURLSafeTitle (string)
 |-- referToReleaseNoudata (string)
 |-- releaseData (object)
 |    |
@@ -124,17 +125,23 @@ ROOT
 - For a playlist it will be the name of the playlist
 - If omitted Player or media library should use release data or media file names to generate a title and set this property
 
-##### `playableItemSafeTitle` (string)
+##### `playableItemFolderSafeTitle` (string)
 - Optional
-- If the `playableItemTitle` contains characters that are not permitted under section 1.26 Safe file and folder names of `02 standard.md` then the player/media management library should do a conversion to safe characters. 
-- This field should contain the result of that conversion AND this is the string used to name the metadata file in the filesystem e.g. `_<release>.noudata`
-- E.g. the album is called "HE??O" 
-	- A player/media software accesses `web.noudata` from the Noubin URL 
-	- The `playableItemTitle` is "HE??O" which is fine for display but the Player/Media Library software detects contains illegal characters for a file path
-	- Upon import to the library the Player/Media software decides how to convert "HE??O" to safe characters as permitted in section 1.26 Safe file and folder names of `02 standard.md` 
-		- Note we don't define a deterministic way to do this as the best possible way is stylistic, not deterministic. E.g.  "HE??O" should become "HELLO" but "GOODBYE?" Should become "GOODBYE". 
-	- Say the result is "HEO". Not ideal but acceptable as user doesn't interact directly with the metadata file much.
-	- Then `playableItemSafeTitle` is set to "HEO" and the local release `.noudata` file is named `_HEO.noudata` 
+- If the `playableItemTitle` contains characters that are not permitted in filenames under section 1.26 Safe file and folder names of `02 standard.md` then the player/media management library should do a conversion to safe characters that will be used for local library file paths e.g `D:/Music/<artist>/<release>/`
+- Setting this field manually is useful if automatic conversion by players is unlikely to produce a satisfactory result. 
+  - e.g. if the release is titled `HE??O` then automatic conversion to a folder/file name would probably just drop the ?s and put it in folder called `/HEO/`. By manually setting `HELLO` in this field then the release folder will be called `/HELLO/`
+- If present, metadata editor UX should prevent entering values that are not folder safe as per `02 standard.md` section 1.26
+
+##### `playableItemURLSafeTitle` (string)
+- Optional
+- A preferred URL path segment form of the playable item / release title for use in Noubin URLs (e.g. `noubin.com/n/<artist>/<release>/ABCD1234`)
+- MUST follow section 1.28 Safe URL path segments of `02 standard.md` (preferred form: lowercase ASCII letters, digits, and hyphens)
+- Or if the artist prefers they can set an editorial slug here even when the display title would already percent-encode cleanly, as percent encoding still makes for a less readable URL. Note also some linkhosts may not support percent encoding. 
+  - e.g. if the release title is `HE??O` then `playableItemURLSafeTitle` might be `hello`
+  - e.g. if the release title is `봄날` then `playableItemURLSafeTitle` might be `spring-day`
+- If present, linkhosts SHOULD prefer this value when constructing the Noubin URL and UX should prevent entering values that are not URL safe or supported by the linkhost URL scheme as per `02 standard.md` section 1.28
+
+	
 ##### `referToReleaseNoudata` (string)
 - Optional
 - A string that contains a relative file path
@@ -142,7 +149,7 @@ ROOT
 - Used when a user associates a Noubin with a specific file in a release. Then it needs its own `noudata` file with unique `noubinKey`, `noubinKeyNormalised`, and optionally `localPlaybackData`
 - Instead of duplicating all the other metadata like `credits` `coverImage` `releaseData` etc this tells the player to look for an authoritative `_<release>.noudata` file at the location. 
 - Then if the user ends up triggering playback of this file through either its own Noubin or via playing the whole album the same metadata is shown. 
-- E.g. if this is `mediafile2.noudata` belonging to the album named "HE!!O" , and whose `playableItemSafeTitle` is "HEO" 
+- E.g. if this is `mediafile2.noudata` belonging to the album named "HE!!O" , and whose `playableItemFolderSafeTitle` is "HEO" 
 	- Then `referToReleaseNoudata` would contain the value `_HEO.noudata`
 - `referToReleaseNoudata` can contain a full relative path, not ideal but can be a situation in a chaotic library where a .noudata file refers to a release file elsewhere in the library. 
 
@@ -253,7 +260,8 @@ credits
 |	|-- item (object)
 |       |-- primaryArtistName (string)
 |-- primaryArtistOverrideName (string)
-|-- primaryArtistSafeName (string)
+|-- primaryArtistFolderSafeName (string)
+|-- primaryArtistURLSafeName (string)
 |-- alternateSearchKeywords (array: string)
 |-- versionOf (array)
 |	|-- item (object)
@@ -330,14 +338,21 @@ Note if you set arrays (e.g. `primaryArtists` or `contributors` array) on both a
 - If present then should replace any listing of the primary artists for display by a player. 
 - E.g. instead of listing an array of primary artists with full names comma separated "Artist A, Artist B" the override string might be "Artist A feat. the incredible Artist B"
 
-##### `primaryArtistSafeName` (string)
+##### `primaryArtistFolderSafeName` (string)
 - Optional
-- If the first `primaryArtistName` or `primaryArtistOverrideName` contains characters that are not permitted in filenames under section 1.26 Safe file and folder names of `02 standard.md` then the player/media management library should do a conversion to safe characters.
-- Or if the artist prefers they can set their safe name here that will be used for e.g. file paths
-- e.g. if the artists name is `MYSTERY *`
-- They can say their `primaryArtistSafeName` should be "MYSTERY STAR" (note a player doing an automatic conversion to safe characters would probably just use MYSTERY)
-- If present then used as the artist name in media library paths e.g `/Music/<artist>/<release>/
+- If the first `primaryArtistName` or `primaryArtistOverrideName` contains characters that are not permitted in filenames under section 1.26 Safe file and folder names of `02 standard.md` then the player/media management library should do a conversion to safe characters that will be used for local library file paths e.g `D:/Music/<artist>/<release>/`
+- Setting this field manually is useful if automatic conversion by players is unlikely to produce a satisfactory result. 
+  - e.g. if the artists name is `MYSTERY *` then automatic conversion to a folder name would probably just drop the * and put it in folder called `/MYSTERY/`, by setting "MYSTERY STAR" in this field then the artist folder will be called `/MYSTERY STAR/`
+- If present, linkhosts UX should prevent entering values that are not folder safe as per `02 standard.md` section 1.26
 
+##### `primaryArtistURLSafeName` (string)
+- Optional
+- A preferred URL path segment form of the primary artist name for use in Noubin URLs (e.g. `noubin.com/n/<artist>/<release>/ABCD1234`)
+- MUST follow section 1.28 Safe URL path segments of `02 standard.md` (preferred form: lowercase ASCII letters, digits, and hyphens)
+- Or if the artist prefers they can set an editorial slug here even when the display title would already percent-encode cleanly, as percent encoding still makes for a less readable URL. Note also some linkhosts may not support percent encoding. 
+- e.g. if the artist name is `MYSTERY *` then `primaryArtistURLSafeName` might be `mystery-star`
+- e.g. if the artist name is `방탄소년단` then `primaryArtistURLSafeName` might be `bts` (note can also add "Bangtan Sonyeondan" to `alternateSearchKeywords`)
+- If present, linkhosts SHOULD prefer this value when constructing the Noubin URL and UX should prevent entering values that are not URL safe or supported by the linkhost URL scheme as per `02 standard.md` section 1.28
 
 ##### `alternateSearchKeywords` (array: string)
 - Optional

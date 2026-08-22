@@ -10,7 +10,7 @@ The open source reference software implementation (Plippa) will hopefully be onl
 
 ----
 ### Status
-This is v0.2.1 of the standard. It should be considered highly volatile and there can potentially be significant breaking changes until v1.0 stable is reached after some real-world testing. 
+This is v0.2.2 of the standard. It should be considered highly volatile and there can potentially be significant breaking changes until v1.0 stable is reached after some real-world testing. 
 
 **If you'd like to implement the standard or contribute**: That'd be great! When you're ready please start a discussions thread to introduce yourself and what you're doing. We can share results and ideas and I can give you a heads up to discuss potentially breaking changes.
 

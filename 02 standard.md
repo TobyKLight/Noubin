@@ -241,8 +241,8 @@ When are End Users also Artists?
 - Files and folders must not end with a space or a period ( . )
 - Total length of a path including file and folder must not exceed 260 characters.
 - UTF-8 encoding should always be used 
-- Note this is only for file and folder naming validity. It doesn't set URL safe characters 
-- see `03 metadata-base.md` entry for `playableItemSafeTitle` for more information
+- Note this is only for file and folder naming validity. It doesn't set URL safe characters — see section 1.28 Safe URL path segments
+- see `03 metadata-base.md` entry for `playableItemFolderSafeTitle` and `primaryArtistFolderSafeName` for more information
 
 ##### 1.27 Dynamic Playlist
 - Players MAY support this function
@@ -250,6 +250,20 @@ When are End Users also Artists?
 - So when the user taps the Noubin again it does the search and plays the media
 - Also respecting other playback settings like shuffle
 - This allows the user to e.g. save a search for an artist to play all that artists songs, or save a search for a genre / category etc to play everything from that genre
+
+##### 1.28 Safe URL path segments
+- Applies when choosing human-readable path segments in a Noubin URL (e.g. `/noubin/<artist>/<release>/`), and to metadata fields that declare a preferred URL form of a name (e.g. `primaryArtistURLSafeName`, `playableItemURLSafeTitle` in `03 metadata-base.md`). 
+- Prefers to avoid precent-encoding so that when a human is reviewing a URL from an NFC tap prompt that can clearly see what it's pointing at. 
+- This is separate from section 1.26. A name that is folder-safe is not automatically URL-safe (and vice versa).
+- **Preferred form (URL-safe slug):** a path segment SHOULD contain only
+	- lowercase ASCII letters `a-z` and `A-Z`
+	- ASCII digits `0-9`
+	- hyphen `-`
+- Spaces and other separators SHOULD become a single hyphen; avoid leading, trailing, or repeated hyphens (e.g. `"The White Stripes"` → `the-white-stripes`)
+- MUST NOT include unencoded characters that are reserved or unsafe in a URL path, including (non-exhaustively): space, `/ \ ? # [ ] @ ! $ & ' ( ) * + , ; = : "` and ASCII control characters
+- Non-ASCII characters (e.g. accented Latin, Hangul, CJK) are possible if correctly percent-encoded as UTF-8 per RFC 3986 (e.g. `ä` → `%c3%a4`)
+	- Because they are valid in a URL players SHOULD accept them and attempt to navigate to them
+	- It is up to linkhosts if they support accepting percent-encoding in their own generated URL slugs. Their UX should only allow entry of `primaryArtistURLSafeName` and `playableItemURLSafeTitle` characters to support what the linkhost supports in its own URL segments. (So these values match whats actually used in the live Noubin URL)
 
 ## 2 NOUBIN URL AND LINKHOST SPECIFICATIONS 
 
@@ -261,6 +275,9 @@ When are End Users also Artists?
 	- EXCEPTION short URLS , see below
 	- EXCEPTION Urls that are domains dedicated to noubin linkhosting e.g. `noubin.com` 
 - Noubin URLs MAY include the artist name in the domain OR a path element e.g `https://artist.com/noubin/release/` or `https://domain.com/noubin/artist/release/`
+	- When an artist/release path segment is human-readable, it SHOULD follow section 1.28 Safe URL path segments
+	- If `primaryArtistURLSafeName` is present in the release metadata, linkhosts SHOULD prefer that value for the artist path segment when constructing a Noubin URL
+	- If `playableItemURLSafeTitle` is present, linkhosts SHOULD prefer that value for the release path segment when constructing a Noubin URL
 	- Note the actual list of artists who worked on a track can be defined in `web.noudata` in far greater detail than can be put in the URL. 
 	-  EXCEPTION short URLS , see below
 - Noubin URLs MAY include random strings in order to prevent automated crawling and/or hide exclusive content that's only available to Noubin owners. When these random strings are included they SHOULD be at the end of the url so that any url preview first shows human readable info like the domain, artist and release at the start. e.g. `https://artist.com/noubin/release/jfijo373/`
@@ -783,9 +800,10 @@ Both media library software and players will be referred to as 'software' here.
 - Continuing for Case A and B: 
 	- The software now has `web.noudata` and a set of local media files that are meant to be linked together.
 	- The first thing is the software should check the `playableItemTitle` property and media file names for illegal characters as per section 1.26 Safe file and folder names. 
-		- Generate a `playableItemSafeTitle` if required
+		- Generate a `playableItemFolderSafeTitle` if required
 		- Rename media files if required
-		- see `03 metadata-base.md` entry for `playableItemSafeTitle` for more information
+		- see `03 metadata-base.md` entry for `playableItemFolderSafeTitle` for more information
+		- If constructing or updating a Noubin URL path, also prefer `playableItemURLSafeTitle` when present (section 1.28)
 	- The `web.noudata` will contain a section listing the files and their expected names and lengths
 	- Depending on the store the files may be different formats, have small variations in length etc.
 		- The files may also have relevant metadata embedded in the file
