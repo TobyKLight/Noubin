@@ -328,7 +328,7 @@ Note if you set arrays (e.g. `primaryArtists` or `contributors` array) on both a
 ##### `primaryArtistOverrideName` (string)
 - Optional
 - If present then should replace any listing of the primary artists for display by a player. 
-- E.g. instead of listing an array of primary artists with full names comma separated "Artist A, Artist B" the override string might be "Artist A feat. the inredible Artist B"
+- E.g. instead of listing an array of primary artists with full names comma separated "Artist A, Artist B" the override string might be "Artist A feat. the incredible Artist B"
 
 ##### `primaryArtistSafeName` (string)
 - Optional
