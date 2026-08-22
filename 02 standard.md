@@ -818,7 +818,7 @@ The most common patterns for file names of media downloaded from stores is
 - Mixtapes will usually just be one huge file and names can vary a lot, but they are often freely downloadable with a direct link in `uniteData` so hopefully no `unite` operation required.
 
 And the software should ideally know from `web.noudata` 
-- `releaseProfile` e.g. `music | podcast | audiobook | mix | other`
+- `releaseData.releaseProfile` e.g. `music | podcast | audiobook | mix | other`
 - `mediaTitle` for this item
 	- But note may include characters that aren't possible in paths
 - `expectedFilename` in `uniteData`

@@ -41,6 +41,7 @@ ROOT
 |-- referToReleaseNoudata (string)
 |-- releaseData (object)
 |    |
+|    |-- releaseProfile (enum: music | podcast | audiobook | mix | other)
 |    |-- credits (object: defined below)
 |    |-- coverImage (object: defined below)
 |    |-- releasePlatforms (array)
@@ -159,6 +160,7 @@ Structure
 ```
 releaseData (object)
 |
+|-- releaseProfile (enum: music | podcast | audiobook | mix | other)
 |-- credits (object: defined below)
 |-- coverImage (object: defined below)
 |-- releasePlatforms (array)
@@ -179,6 +181,15 @@ releaseData (object)
 
 `credits` object defined in their own sections below
 `coverImage` object defined in its own section below
+
+##### `releaseProfile` (enum: `music | podcast | audiobook | mix | other`)
+- Optional
+	- If omitted assume `other`
+	- Expect extensions may be implemented here in future, so if it's an unrecognised enum value treat as `other`
+- Used to inform the `unite` function that matches `web.noudata` to actual media files purchased from a store, as there are different industry conventions around filenames for e.g. music vs audiobooks. See `02 standard.md` section 4.7.1 Reference: heuristics for uniting `mediaTitle` and `uniteData` with actual media filenames
+- This is not meant to be a perfect or exhaustive list. Could theoretically include e.g. comedy, radio play, speech etc but those types of productions are not linked to their own distribution channel conventions at the moment. For example comedy recordings are often distributed through the existing music or podcast channels and will use file namings from those worlds.
+	- You can still make "comedy" searchable by including that as a relevant category in the `categories` section (as a tag, genre etc)
+- We of course extend this in future if there is demand.
 
 ##### `releasePlatforms` (array)
 - optional 
@@ -238,7 +249,6 @@ Structure
 ```
 credits
 |
-|-- releaseProfile (enum: music | podcast | audiobook | mix | other)
 |-- primaryArtists (array)
 |	|-- item (object)
 |       |-- primaryArtistName (string)
@@ -257,12 +267,12 @@ credits
 |	|-- item (object)
 |		|-- contributorRole (string)
 |       |-- contributorName (string)
-|       |-- contributorLink (string: url)
+|       |-- contributorURL (string: url)
 |-- orgs (array)
 |	|-- item (object)
 |		|-- orgRole (string)
 |       |-- orgName (string)
-|       |-- orgLink (string: url)
+|       |-- orgURL (string: url)
 |-- releaseEdition (string)
 |-- seriesInfo (object)
 |	|
@@ -287,45 +297,27 @@ credits
 
 ###### Note on credits 
 
-`primaryArtists` is intentionally just a display-oriented name list. Roles (songwriter, narrator, guest, engineer, etc.) live in `contributors`, not on the primary artist entries.
-
-Consider music vs audiobooks. Music often has a songwriter and a performer; audiobooks often have an author and a narrator. When the media is playing, what should go in the 'artist' display area on a player?
-- For music the primary artist is usually the performer
-- For audiobooks the primary artist is usually the author
-- Music also has a convention of listing collaborations as a single entry like "Artist A feat. Artist B and C" — use `primaryArtistOverrideName` for that
-
-So the structure keeps:
-- `primaryArtists` / `primaryArtistOverrideName` as the simple string(s) a microcontroller player can print
-- `contributors` (and `orgs`) for richer role-labelled credits that media management UIs and detailed credit screens can show
-- `releaseProfile` as guidance for which contributor/org roles to suggest at data entry time
-
-All types have an open `additionalCreditsText` field where the creator can put any further information that does not fit in structured data fields. E.g. special thanks. 
-
-Finally note that specific media items (tracks) can have more specific credits that override the general release credits. 
+Note that specific media items (tracks) can have more specific credits that override the general release credits. 
 E.g. An album by Beyoncé has the primary artist of the album set as Beyoncé. 
 But an individual track that's a collaboration might specify a higher priority `primaryArtists` list of Beyoncé and Kendrick Lamar.
 
-Back to the schema: 
-
-##### `releaseProfile` (enum: `music | podcast | audiobook | mix | other`)
-- Optional, 
-	- If omitted assume `other`
-	- Expect extensions may be implemented here in future, so if it's an unrecognised enum value treat as `other`
-- This is guidance towards how the credits should be filled in
-	- Used to suggest which names belong in `primaryArtists` and which `contributorRole` / `orgRole` values to offer when generating `web.noudata` metadata for each industry sector. 
-	- Used to inform `unite` function that matches `web.noudata` to actual media files purchased from a store, as there are different industry conventions around filenames for .e.g music vs audiobooks. See `02 standard.md` section 4.7.1 Reference: heuristics for uniting `mediaTitle` and `uniteData` with actual media filenames
-- This is not meant to be a perfect or exhaustive list. Could theoretically include e.g. comedy, radio play, speech etc but those types of productions are not linked to their own distribution channel conventions at the moment. For example comedy recordings are often distributed through the existing music, podcast or video channels and will use file namings from those worlds.
-	- Since free text entry is always possible the creator can bend existing profiles or use the `other` profile to achieve what they want. 
-	- You can still make "comedy" searchable by including that as a relevant category in the `categories` section (as a tag, genre etc)
-- We of course extend this in future if there is demand.
+Note if you set arrays (e.g. `primaryArtists` or `contributors` array) on both a release and individual media item level the individual media item array will override the release level array (not append), so if you do this always include the complete list again at the media item level.
 
 ##### `primaryArtists` (array)
 - optional
+- This is an array because a piece of media can have one ore more primary artists associated with it.
+  - Generally this field should be set with:
+    - Who should be attributed as the headline artist or artists whose name should be displayed when media is played. 
+    - Who is the artists that the item should be organised under in a media library and that users would typically search for when looking for this item. 
+	  - E.g. for covers you typically want to list the artist who performed the cover as the primary artist. So if it's the White Stripes version of Jolene by Dolly Parton, the user doesn't hear the White Stripes playing when they do a basic search for media by Dolly Parton. Use the versionOf element later to set the cover relationship. 
+    - Use multiple primary artists when you think the user would genuinely want to see the item when they searched for either artist. E.g. The audiobook version of the Hobbit by J.R.R Tolkien narrated by Andy Serkis, list both Tolkien and Serkis as primary artists.  	  
+  - There is space in the contributor section later for listing the full credits of individuals/groups who contributed to a piece of media
 - each element consists of 
 	- `primaryArtistName` (string)
 		- Required for this to be a valid `primaryArtists` array element; if omitted ignore the element
 		- The name the artist wants displayed on the player for this release
 - Ordered in desired display order
+
 - This is a display list only — no roles on these entries. Put role-labelled people (songwriter, narrator, guest, engineer, etc.) in `contributors`.
 - Guidance by `releaseProfile` for which name(s) typically belong here (media management software and Noubin URL creation tools SHOULD suggest this in UX):
 	- for `releaseProfile` = `music` → the performer(s)
@@ -336,14 +328,14 @@ Back to the schema:
 ##### `primaryArtistOverrideName` (string)
 - Optional
 - If present then should replace any listing of the primary artists for display by a player. 
-- E.g. instead of listing an array of primary artists with full names comma separated "Artist A, Artist B" the override string might be "Artist A feat. Artist B"
+- E.g. instead of listing an array of primary artists with full names comma separated "Artist A, Artist B" the override string might be "Artist A feat. the inredible Artist B"
 
 ##### `primaryArtistSafeName` (string)
 - Optional
 - If the first `primaryArtistName` or `primaryArtistOverrideName` contains characters that are not permitted in filenames under section 1.26 Safe file and folder names of `02 standard.md` then the player/media management library should do a conversion to safe characters.
 - Or if the artist prefers they can set their safe name here that will be used for e.g. file paths
 - e.g. if the artists name is `MYSTERY *`
-- They can say their `primaryArtistSafeName` should be "MYSTERY STAR"
+- They can say their `primaryArtistSafeName` should be "MYSTERY STAR" (note a player doing an automatic conversion to safe characters would probably just use MYSTERY)
 - If present then used as the artist name in media library paths e.g `/Music/<artist>/<release>/
 
 
@@ -382,41 +374,37 @@ Back to the schema:
 
 ##### `contributors` (array)
 - optional
+- Intended for the "long list" of everyone who contributed to a release or media item
+- You can list the primary artists again if you want to specify their role e.g. author vs narrator or vocalist vs musicians etc. 
+- You can list groups of artists (bands) or individuals. 
+- For further credits that don't fit in this format use the additionalCreditsText field. 
 - each element consists of 
 	- `contributorRole` (string)
 		- Optional
 		- Free text role label e.g. songwriter, producer, narrator, guest, engineer
 	- `contributorName` (string)
 		- Required for this to be a valid `contributors` array element; if omitted ignore the element
-	- `contributorLink` (string: url)
+	- `contributorURL` (string: url)
 		- Optional
 		- A link relevant to this contributor (e.g. their website, Bandcamp, social profile)
 - Ordered in desired display order
-- Use this for any person who should appear in credits with a role, including roles that are not the primary display artist.
-- Recommended `contributorRole` suggestions depending on `releaseProfile` (strong UX guardrails / combobox before free text; free text allowed):
-	- for `releaseProfile` = `music` → `performer | composer | songwriter | producer` plus free text for other crew
-	- for `releaseProfile` = `podcast` → `guest | producer` plus free text
-	- for `releaseProfile` = `audiobook` → `narrator | producer` plus free text
-	- for `releaseProfile` = `mix` → free text for mix production crew if needed
 - For mixes: do **not** list every track's original artist here as contributors. Use a `cueLists` entry with `cueListType` = `credits` so the player can show which song (and whose) is playing at the current timestamp.
 
 ##### `orgs` (array)
 - optional
+- Organisations associated with a release or media item, e.g. record labels, publishers etc. 
+  - Not typically groups of performers (bands) those are considered artists or contributors. 
 - each element consists of 
 	- `orgRole` (string)
 		- Optional
 		- e.g. publisher, imprint
 	- `orgName` (string)
 		- Required for this to be a valid `orgs` array element; if omitted ignore the element
-	- `orgLink` (string: url)
+	- `orgURL` (string: url)
 		- Optional
 		- A link relevant to this organisation (e.g. label site, publisher catalogue page)
 - Ordered in desired display order
-- `orgRole` has specific recommended values depending on `releaseProfile`. Media management software and Noubin URL creation tools should provide strong UX guardrails so that these are used (e.g with combobox selection before free text entry is allowed). Free text is allowed but not recommended.
-	- for `releaseProfile` = `music` the org roles are `label | publisher | recordingStudio | masteringStudio`  
-	- for `releaseProfile` = `podcast` org roles are free text
-	- for `releaseProfile` = `audiobook` the org roles are `publisher | imprint | recordingStudio | masteringStudio`
-	- for `releaseProfile` = `mix` it's recommended not to offer org entry by default
+
 
 ##### `releaseEdition` (string)
 - optional
@@ -504,8 +492,8 @@ Back to the schema:
 - All of these are optional
 - See `02 standard.md` section 1.25 Supported image formats for more information about acceptable image formats and the role of thumbnails
 - Note regarding thumbnails: only the original image NOT thumbnails is linked in the metadata file.
-	- The presence of thumbnails or not is defined by the actual thumbnail image file presence in the `/thumbnails` subfolder using naming conventions as defined in `02 standard.md` section 1.25. Players SHOULD also check `/Thumbnails` if thumbnails are not found.
-- Small design note why isn't the `coverImage` object here just the array itself? To support future expansion of this object if we add moving cover images or some other more complex definition of multiple image slideshow behaviour etc. 
+	- The presence of thumbnails or not is defined by the actual thumbnail image file presence in the `/thumbnails` subfolder using naming conventions as defined in `02 standard.md` section 1.25. Players SHOULD also check `/Thumbnails` with uppercase T. 
+	- Small design note why isn't the `coverImage` object here just the array itself? To support future expansion of this object if we add moving cover images or some other more complex definition of multiple image slideshow behaviour etc. 
 
 Structure
 ```
@@ -854,7 +842,7 @@ cueLists (array)
 	- `nav` = navigation markers, e.g. chapter markers in an audio book.
 	- `credits` = information about content inside the track e.g. guest in part of a podcast, track playing inside a mix. Also navigable by default. 
 	- `text` = text of musical content (lyrics) and non musical content (script/transcript).
-		- Players can use `releaseProfile` from the credits object to display the option as `show lyrics` (for music) or `show transcript` (for podcast, audiobook etc)
+		- Players can use `releaseProfile` from `releaseData` to display the option as `show lyrics` (for music) or `show transcript` (for podcast, audiobook etc)
 - Note how `nav` and `credits` are kind of similar, why not combine them? Because a track could have both or even multiple cue lists of these types. Like main nav markers AND separate overlapping credits. 
 
 ##### `cueListTitle` (string)
