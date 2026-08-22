@@ -270,7 +270,6 @@ credits
 |        |-- sourceItemPrimaryArtist (string)
 |        |-- sourceItemReleaseDate (string: date format ISO-8601)
 |        |-- sourceItemIdentifier (string)
-|-- artistLocalID (string)
 |-- contributors (array)
 |    |-- item (object)
 |        |-- contributorRole (string)
@@ -577,7 +576,6 @@ Structure
 |-- searchString (string)
 |-- userNotes (object)
 |-- localCoverImage (object)
-|-- artistLocalID (string)
 ```
 
 
@@ -623,12 +621,6 @@ Structure
 `userNotes` is defined below
 
 `localCoverImage` is defined above
-
-
-##### `artistLocalID` (string)
-- Optional
-- String that the user can add to link an artists releases where for some reason the artists regular primary name does not match across releases. E.g. the user may wish "Prince" and "The Artist Formerly Known As Prince" to appear together under "Prince". 
-- Any player SHOULD then use this internally  
 
 ---
 ### `userNotes` (object) and `itemUserNotes` (object)
