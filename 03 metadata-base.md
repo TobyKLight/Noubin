@@ -241,24 +241,28 @@ credits
 |-- releaseProfile (enum: music | podcast | audiobook | mix | other)
 |-- primaryArtists (array)
 |	|-- item (object)
-|		|-- primaryArtistRole (string)
 |       |-- primaryArtistName (string)
 |-- primaryArtistOverrideName (string)
 |-- primaryArtistSafeName (string)
 |-- alternateSearchKeywords (array: string)
-|-- artistLocalID (string)
-|-- secondaryArtists (array)
+|-- versionOf (array)
 |	|-- item (object)
-|		|-- secondaryArtistRole (string)
-|       |-- secondaryArtistName (string)
-|-- contributorsAndCrew (array)
+|		|-- versionType (enum: cover | remix | reissue | other)
+|		|-- sourceItemTitle (string)
+|		|-- sourceItemPrimaryArtist (string)
+|		|-- sourceItemReleaseDate (string: date format ISO-8601)
+|		|-- sourceItemIdentifier (string)
+|-- artistLocalID (string)
+|-- contributors (array)
 |	|-- item (object)
 |		|-- contributorRole (string)
 |       |-- contributorName (string)
+|       |-- contributorLink (string: url)
 |-- orgs (array)
 |	|-- item (object)
 |		|-- orgRole (string)
 |       |-- orgName (string)
+|       |-- orgLink (string: url)
 |-- releaseEdition (string)
 |-- seriesInfo (object)
 |	|
@@ -268,7 +272,6 @@ credits
 |	|-- seriesTotal (integer)
 |-- language (string: BCP 47 format)
 |-- releaseDate (string: date format ISO-8601)
-|-- originalReleaseDate (string: date format ISO-8601)
 |-- description (string)
 |-- categories (array)
 |	|-- item (object)
@@ -284,19 +287,17 @@ credits
 
 ###### Note on credits 
 
-Why is there the role differentiation based on `releaseProfile`?
+`primaryArtists` is intentionally just a display-oriented name list. Roles (songwriter, narrator, guest, engineer, etc.) live in `contributors`, not on the primary artist entries.
 
-Consider the case of music vs audiobooks. Music can have a songwriter and a performer, audiobooks often have an author and a narrator. 
+Consider music vs audiobooks. Music often has a songwriter and a performer; audiobooks often have an author and a narrator. When the media is playing, what should go in the 'artist' display area on a player?
+- For music the primary artist is usually the performer
+- For audiobooks the primary artist is usually the author
+- Music also has a convention of listing collaborations as a single entry like "Artist A feat. Artist B and C" — use `primaryArtistOverrideName` for that
 
-Semantically in terms of roles songwriter is closer to author and performer is closer to narrator. 
-But when the media is playing what should go in the 'artist' display area on a player? 
-In the case of music the primary artist is usually the performer, in the case of audiobooks the primary artist is usually the author. 
-Finally in music there is a convention of listing collaborations with multiple artists as a single entry "Artist A feat. Artist B and C"
-
-So the structure here is a bit unusual to both 
-- facilitate lightweight parsing by potentially basic microcontroller players 
-- minimise errors at the data entry stage with explicit roles. 
-A media management system can be strict to ensure data is entered correctly while the microcontroller based player just always takes the string and prints it. 
+So the structure keeps:
+- `primaryArtists` / `primaryArtistOverrideName` as the simple string(s) a microcontroller player can print
+- `contributors` (and `orgs`) for richer role-labelled credits that media management UIs and detailed credit screens can show
+- `releaseProfile` as guidance for which contributor/org roles to suggest at data entry time
 
 All types have an open `additionalCreditsText` field where the creator can put any further information that does not fit in structured data fields. E.g. special thanks. 
 
@@ -311,7 +312,7 @@ Back to the schema:
 	- If omitted assume `other`
 	- Expect extensions may be implemented here in future, so if it's an unrecognised enum value treat as `other`
 - This is guidance towards how the credits should be filled in
-	- Used to suggest roles that should be used when generating `web.noudata` metadata specific for each industry sector. 
+	- Used to suggest which names belong in `primaryArtists` and which `contributorRole` / `orgRole` values to offer when generating `web.noudata` metadata for each industry sector. 
 	- Used to inform `unite` function that matches `web.noudata` to actual media files purchased from a store, as there are different industry conventions around filenames for .e.g music vs audiobooks. See `02 standard.md` section 4.7.1 Reference: heuristics for uniting `mediaTitle` and `uniteData` with actual media filenames
 - This is not meant to be a perfect or exhaustive list. Could theoretically include e.g. comedy, radio play, speech etc but those types of productions are not linked to their own distribution channel conventions at the moment. For example comedy recordings are often distributed through the existing music, podcast or video channels and will use file namings from those worlds.
 	- Since free text entry is always possible the creator can bend existing profiles or use the `other` profile to achieve what they want. 
@@ -321,15 +322,16 @@ Back to the schema:
 ##### `primaryArtists` (array)
 - optional
 - each element consists of 
-	- `primaryArtistRole` e.g. songwriter, performer, author
-	- `primaryArtistName`
+	- `primaryArtistName` (string)
+		- Required for this to be a valid `primaryArtists` array element; if omitted ignore the element
+		- The name the artist wants displayed on the player for this release
 - Ordered in desired display order
-- `primaryArtistRole` has specific recommended values depending on `releaseProfile`. Media management software and Noubin URL creation tools should provide strong UX guardrails so that these are used (e.g with combobox selection before free text entry is allowed) so that the right artist ends up in the right field. Free text is allowed but not recommended.
-	- for `releaseProfile` = `music` the primary artist roles are `performer | composer | songwriter | producer`  
-	- for `releaseProfile` = `podcast` the primary artist role is `host`
-	- for `releaseProfile` = `audiobook` the primary artist role is `author`
-	- for `releaseProfile` = `mix` the primary artist roles are `performer | composer | songwriter | producer | DJ`
-- `primaryArtistName` should be the name the artist wants displayed on the player for this release
+- This is a display list only — no roles on these entries. Put role-labelled people (songwriter, narrator, guest, engineer, etc.) in `contributors`.
+- Guidance by `releaseProfile` for which name(s) typically belong here (media management software and Noubin URL creation tools SHOULD suggest this in UX):
+	- for `releaseProfile` = `music` → the performer(s)
+	- for `releaseProfile` = `podcast` → the host(s)
+	- for `releaseProfile` = `audiobook` → the author(s)
+	- for `releaseProfile` = `mix` → the DJ / performer of the mix
 
 ##### `primaryArtistOverrideName` (string)
 - Optional
@@ -344,39 +346,74 @@ Back to the schema:
 - They can say their `primaryArtistSafeName` should be "MYSTERY STAR"
 - If present then used as the artist name in media library paths e.g `/Music/<artist>/<release>/
 
+
 ##### `alternateSearchKeywords` (array: string)
 - Optional
 - an array of strings representing alternative names relevant for the release or artist intended to help users with searches. Particularly where the primary artist is commonly known by an acronym, their name uses special characters or this release is aimed at users using a different alphabet. 
 	- E.g. `PrimaryArtistName` could be "방탄소년단" then `alternateSearchKeywords` could be "BTS", "Bulletproof Boy Scouts" etc
 
-##### `secondaryArtists` (array)
+##### `versionOf` (array)
 - optional
-- each element consists of 
-	- `secondaryArtistRole` e.g. songwriter, performer, author
-	- `secondaryArtistName`
-- Ordered in desired display order
-- `secondaryArtistRole` has specific recommended values depending on `releaseProfile`. Media management software and Noubin URL creation tools should provide strong UX guardrails so that these are used (e.g with combobox selection before free text entry is allowed) so that the right artist ends up in the right field. Free text is allowed but not recommended.
-	- for `releaseProfile` = `music` the secondary artist roles are `performer | composer | songwriter | producer`  
-	- for `releaseProfile` = `podcast` the secondary artist role is `guest`
-	- for `releaseProfile` = `audiobook` the secondary artist role is `narrator`
-	- for `releaseProfile` = `mix` it's recommended not to offer secondaryArtists in the UI (instead use `cueLists` to offer credits of the original songs at the time they play)
+- Include this object when this track/release is a version of some earlier media
+- This is an array that supports multiple entries because e.g. it's possible an item can be  a reissue of a track that is itself a cover can list both: one element with `versionType` = `reissue` pointing at the prior edition, and another with `versionType` = `cover` pointing at the original song. OR another case could be a mashup (remix) of two or more earlier songs. 
+	- For DJ mixes of multiple tracks: do **not** list the original tracks here. Instead use a `cueLists` entry with `cueListType` = `credits` so the Player can show which song is playing at the current timestamp.
+- Order in desired display order
+- Each element is an object. For an element to be valid it MUST include both `sourceItemTitle` and `sourceItemPrimaryArtist`; if either is missing ignore that element only
+- Each element contains:
+	- `versionType` (enum: `cover | remix | reissue | other`)
+		- Optional
+			- If omitted assume `other`
+			- Expect extensions may be implemented here in future so if it's an unrecognised enum value treat as `other`
+	- `sourceItemTitle` (string)
+		- Required for this to be a valid `versionOf` array element
+		- Title of the earlier media item this is a version of
+	- `sourceItemPrimaryArtist` (string)
+		- Required for this to be a valid `versionOf` array element
+		- Primary artist associated with that earlier media item
+	- `sourceItemReleaseDate` (string: date format ISO-8601)
+		- Optional
+		- Release date of the source item
+		- ISO8601 supports time as well but just put the date YYYY-MM-DD
+		- e.g. "1971-11-08"
+	- `sourceItemIdentifier` (string)
+		- Optional
+		- Identifier of a source item e.g. ISRC code
+- Note `versionOf` may be relevant at the release level (e.g. reissue of an album) or single item level (e.g. cover of a song) and should be added appropriately. 
 
-##### `contributorsAndCrew` (array)
+##### `contributors` (array)
 - optional
 - each element consists of 
-	- `contributorRole` e.g. 
-	- `contributorName`
+	- `contributorRole` (string)
+		- Optional
+		- Free text role label e.g. songwriter, producer, narrator, guest, engineer
+	- `contributorName` (string)
+		- Required for this to be a valid `contributors` array element; if omitted ignore the element
+	- `contributorLink` (string: url)
+		- Optional
+		- A link relevant to this contributor (e.g. their website, Bandcamp, social profile)
 - Ordered in desired display order
-- `contributorRoles` are free text, but can be used to add any other structured data about contributor or crew roles that doesn't fit in primary or secondary artists. 
+- Use this for any person who should appear in credits with a role, including roles that are not the primary display artist.
+- Recommended `contributorRole` suggestions depending on `releaseProfile` (strong UX guardrails / combobox before free text; free text allowed):
+	- for `releaseProfile` = `music` → `performer | composer | songwriter | producer` plus free text for other crew
+	- for `releaseProfile` = `podcast` → `guest | producer` plus free text
+	- for `releaseProfile` = `audiobook` → `narrator | producer` plus free text
+	- for `releaseProfile` = `mix` → free text for mix production crew if needed
+- For mixes: do **not** list every track's original artist here as contributors. Use a `cueLists` entry with `cueListType` = `credits` so the player can show which song (and whose) is playing at the current timestamp.
 
 ##### `orgs` (array)
 - optional
 - each element consists of 
-	- `orgRole` e.g. publisher, imprint
-	- `orgName`
+	- `orgRole` (string)
+		- Optional
+		- e.g. publisher, imprint
+	- `orgName` (string)
+		- Required for this to be a valid `orgs` array element; if omitted ignore the element
+	- `orgLink` (string: url)
+		- Optional
+		- A link relevant to this organisation (e.g. label site, publisher catalogue page)
 - Ordered in desired display order
-- ``orgRole`` has specific recommended values depending on `releaseProfile`. Media management software and Noubin URL creation tools should provide strong UX guardrails so that these are used (e.g with combobox selection before free text entry is allowed) so that the right artist ends up in the right field. Free text is allowed but not recommended.
-	- for `releaseProfile` = `music` the org roles are `label | publisher | recordingStudio | masteringStudio `  
+- `orgRole` has specific recommended values depending on `releaseProfile`. Media management software and Noubin URL creation tools should provide strong UX guardrails so that these are used (e.g with combobox selection before free text entry is allowed). Free text is allowed but not recommended.
+	- for `releaseProfile` = `music` the org roles are `label | publisher | recordingStudio | masteringStudio`  
 	- for `releaseProfile` = `podcast` org roles are free text
 	- for `releaseProfile` = `audiobook` the org roles are `publisher | imprint | recordingStudio | masteringStudio`
 	- for `releaseProfile` = `mix` it's recommended not to offer org entry by default
@@ -423,18 +460,12 @@ Back to the schema:
 - ISO8601 supports time as well but just put the date YYYY-MM-DD
 - e.g. "2026-06-17"
 
-##### `originalReleaseDate` (string: date format ISO-8601)
-- optional
-- if the release is some kind of reissue the date the original was released
-- ISO8601 supports time as well but just put the date YYYY-MM-DD
-- e.g. "2025-06-17"
-
 ##### `description` (string)
 - optional
 - a short text description to accompany the release/track
-- Can always be included contextually dependent on the `releaseProfile` for how relevant this is
-- expect multiline
+- Player can choose to show this contextually based on the `releaseProfile` 
 - E.g. users browsing podcast episodes probably do value reading a short description of the episode, this is less common for music
+- Multiline entry is possible see 02 standard.md section 1.20
 
 ##### `categories` (array)
 - optional
@@ -443,25 +474,24 @@ Back to the schema:
 	- `categoryName` e.g. blues, pop, news, fantasy, comedy
 - For any kind of structured categorisation relevant to this kind of release (e.g. music and audiobooks have "genres", podcasts have "topics" etc)
 - Players should generally ensure this data is searchable for finding releases. 
-- This array is only for structured categorisation added by the creator. User added tags are stored in `localPlaybackData` object
+- This array is only for categories added by the creator of the noubin metadata file. When a user later adds their own tags relevant to their specific music library those are stored in `localPlaybackData` object
 
 ##### `legalNotice` (string)
 - optional 
 - legal text 
-- expect multiline
+- Multiline entry is possible see 02 standard.md section 1.20
 
 ##### `identifiers` (array)
 - optional
 - each element consists of 
 	- `identifierType` e.g. ISBN, ISRC, ASIN, UPC
 	- `identifierValue`
-- Here you can put the various numbers that are meant to be attached to various kinds of media. 
-
+- Here you can put the various numbers that are attached to certain kinds of media. 
 
 ##### `additionalCreditsText` (string)
 - optional
 - free text for the creator to put additional credits information in unstructured format
-- expect multiline
+- Multiline entry is possible see 02 standard.md section 1.20
 - e.g. "Special thanks to Dave for letting us use his snowmobile to get to the synthesiser repair shop"
 
 
@@ -757,7 +787,7 @@ The objects `itemCredits`,  `itemUserNotes` and `itemCoverImage` are defined abo
 ##### `lyricsTranscript` (string)
 - optional
 - text of the lyrics (of music) or transcript (of spoken media)
-- expect multiline
+- Multiline entry is possible see 02 standard.md section 1.20
 - If available, dynamic lyrics/transcript are preferred as part of a `cueLists` entry with `cueListType` = `text`. 
 
 ##### `musicalData` (object)
@@ -769,15 +799,15 @@ The objects `itemCredits`,  `itemUserNotes` and `itemCoverImage` are defined abo
 		- Optional
 	- `musicalKey` a string.
 		- Optional
-		- When `musicalKey` is included then for typical western musical keys SHOULD be  formatted like so
+		- When `musicalKey` is included then for typical western musical keys SHOULD be formatted in this style: 
 			- "C" = C major
 			- "Cm" = C minor
 			- "F#" = F sharp major
 			- "F#m" = F sharp minor
 			- "Eb" = E flat major
 			- "Ebm" = E flat minor
-		- Note the use of hash # symbol and lowercase b from standard US keyboard character set, NOT fancy unicode U+266F or U+266D
-- Note this is not enough information for looping or auto-mixing, doesn't indicate e.g. where the first bar starts or if BPM changes over the song, time signature etc. This should be covered by extensions to the standard if there is interest. 
+		- Note the use of hash # symbol and lowercase b from standard US keyboard character set, NOT fancy unicode U+266F or U+266D musical symbols 
+- Note this is not enough information for looping or auto-mixing, doesn't indicate e.g. where the first bar starts or if BPM changes over the song, time signature etc. This could be added by extensions to the standard if there is interest. 
 
 ---
 ##### `cueLists` (array)
@@ -842,9 +872,9 @@ cueLists (array)
 - Optional
 	- If omitted and `cueListType` is `nav` or `credits` then this defaults to TRUE
 		- If `cueListType` is anything else this defaults to FALSE
-- Sets if the cue list is navigable and prev/next nav buttons (probably prev/next track on most players) should jump the playhead time through this list
+- Sets if the cue list is navigable and prev/next nav point buttons should jump the playhead time through this list. Note Players that don't have dedicated prev/next nav point buttons may use prev/next track buttons to jump to nav points when nav points are available.
 - Should be set appropriately when `cueListType` = "other"
-- Note if navigation is enabled on multiple active cueLists and the user presses 'next nav' the players SHOULD jump the user to the next navigable `startTime` on any track.
+- Note if navigation is enabled on multiple active cueLists and the user presses 'next nav' the players SHOULD jump the user to the next navigable `startTime` on any cuelist.
 - Can be used as an override to e.g. disable navigation on `credits` tracks if there is already a `nav` track and you don't think the user will want to also 
 - Or can force enable it to navigate through a `transcript` for some esoteric usecase like quick scrubbing through spoken text in a court transcript or something. Or jumping back to the line you want to sing over and over again in karaoke. 
 
@@ -868,20 +898,23 @@ cueLists (array)
 		- Required for this to be a valid `cues` array element
 			- Must have at least one element to be valid.
 		- Contains an array of the text to be shown to the user during this cue
-		- The base functionality is Players generate the text for display by concatenating each `text` element of the `cueTextSpans` array without spaces.
+		- The base functionality is Players generate the text for display by concatenating each `text` element of the `cueTextSpans` array **without** spaces. 
 		- Why use an array here? 
 			- To support extensions in future that add extra **per word** metadata, like karaoke highlighting or different colours for who is speaking etc.  
-			- We are supporting it as an array in the base standard now so imports from common open subtitle and transcript formats can retain per work markup data for future use.
+			- We are supporting it as an array in the base standard now so imports from common open subtitle and transcript formats can retain per work markup data for future use. (It's envisioned such an extension would add additional sibling arrays of matching length to encode the span properties)
 		- If you don't have per word data then simply set only one element in this array with the whole text string
+			- Hence most metadata editors should just offer this as a single string input that simply sets the first element of the `cueTextSpans` array
 		- Each element of the array contains a `text` (string)
 			- a UTF-8 string
 			- Depending on the capabilities of the screen players SHOULD implement appropriate fonts and rendering functions to get a good level of accessibility across multiple languages.
 			- However we recognise asking microcontroller based players and other modest hardware to support all of unicode is just not realistic. 
 			- Players MUST NOT crash or produce errors on unsupported characters. The plain square missing character glyph (□ aka tofu) is the preferred fallback. 
 			- MAY contain white space
-			- MAY contain line ending / new line characters. Common in subtitle formats e.g.
+			- Multiline is discouraged but possible, so MAY contain line ending / new line characters. Common in subtitle formats e.g.
 				- "- are you ready?
 				  -I was born ready"
+			- For newline char encoding see 02 standard.md section 1.20  
+		- For credits of music (e.g. tracks in a mix) then this `cueTextSpans` array should contain a single element in the format "Title - Primary Artist" e.g. "Livin’ La Vida Loca - Ricky Martin" 
 	- `cueURL` (string)
 		- Optional
 		- Web enabled players MAY support visiting this URL or giving it to the user via NFC to check on their own device. 

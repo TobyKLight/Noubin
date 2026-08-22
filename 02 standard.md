@@ -145,6 +145,16 @@ When are End Users also Artists?
 - Noudata metadata files MUST end with the extension `.noudata`
 - Noudata files MUST be created, named and organised based on section 2 NOUBIN URL AND LINKHOST SPECIFICATIONS and section 4 NOUBIN MEDIA LIBRARY SPECIFICATIONS.  
 - Noudata file content MUST be encoded with JSON and follow the Noubin Metadata format, defined in `03 metadata-base.md` and its extensions.
+- Noudata files MUST be UTF-8 encoded text (with or without a BOM; players MUST accept both)
+- Multiline strings: Where `03 metadata-base.md` marks a string field as multiline (e.g. `description`, `legalNotice`, `additionalCreditsText`, `lyricsTranscript`, cue text), the following apply:
+	- On disk the file MUST be valid JSON per RFC 8259. Unescaped control characters (including raw line breaks) MUST NOT appear inside JSON string values. Newlines MUST be written as the JSON escapes `\n` (line feed, U+000A) and, if present, `\r` (carriage return, U+000D).
+	- After JSON parsing, the in-memory string MAY contain real line-break code points.
+	- Writers SHOULD normalize line endings to LF only (`U+000A`) before writing. Prefer `\n` over `\r\n` or lone `\r` in the stored string value.
+	- When reading or importing data that contains CRLF (`U+000D` + `U+000A`) or lone CR (`U+000D`), writers and media management software SHOULD normalize to LF before saving.
+	- When displaying multiline text, players SHOULD treat LF, CRLF, and lone CR as line breaks. Players MUST NOT crash on any of these forms.
+	- Trailing newlines at the end of a multiline field are OPTIONAL; players MAY trim these. 
+	- Players SHOULD display multiline fields correctly, they MAY set a maximum line limit after which data is truncated if it's e.g. necessary for a cohesive layout. 
+	- Any editor of Noudata Metadata files SHOULD offer a multiline input field 
 - Note the SAME metadata format is both employed on the internet to provide information about media and where to purchase it AND then locally on players the same data is used and extended to provide location of actual downloaded media to play it. 
 	- This addresses an issue with current music distribution reality that audio file formats have different embedded metadata standards, plus distribution services and release platforms manipulate and present metadata differently.
 	- We propose that artists provide a Noubin URL with canonical information about their release including where to buy it, user buys and downloads it, then local media files are appended to the same metadata from that URL the artist originally generated.
