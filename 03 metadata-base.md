@@ -25,7 +25,7 @@ Finally there are software considerations where structuring data in a given way 
 
 ## SCHEMA
 
-`.noudata` metadata files MUST be JSON format
+`.noudata` metadata files MUST be written in JSON format with a `.noudata` file extension. 
 
 For information about file naming and organisation see `02 standard.md` section 4 NOUBIN MEDIA LIBRARY SPECIFICATIONS
 
@@ -273,13 +273,13 @@ credits
 |-- contributors (array)
 |    |-- item (object)
 |        |-- contributorRole (string)
-|       |-- contributorName (string)
-|       |-- contributorURL (string: url)
+|        |-- contributorName (string)
+|        |-- contributorURL (string: url)
 |-- orgs (array)
 |    |-- item (object)
 |        |-- orgRole (string)
-|       |-- orgName (string)
-|       |-- orgURL (string: url)
+|        |-- orgName (string)
+|        |-- orgURL (string: url)
 |-- releaseEdition (string)
 |-- seriesInfo (object)
 |    |
@@ -292,12 +292,12 @@ credits
 |-- description (string)
 |-- categories (array)
 |    |-- item (object)
-|        |-- categoryType (string)
+|       |-- categoryType (string)
 |       |-- categoryName (string)
 |-- legalNotice (string)
 |-- identifiers (array)
 |    |-- item (object)
-|        |-- identifierType (string)
+|       |-- identifierType (string)
 |       |-- identifierValue (string)
 |-- additionalCreditsText (string)
 ```
