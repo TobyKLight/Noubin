@@ -200,8 +200,8 @@ When are End Users also Artists?
   - PNG encoding contained in .png files
     - Small detail here: PNG only strictly has to be supported if the player supports images above 1024x1024. Otherwise it can support 1024x1024 thumbnails which are limited to JPG and webP formats. (see thumbnail formats below)
 - Artists MUST NOT link to images higher than this quality in `web.noudata`:
-  - 3000x3000 resolution
-  - 8MB file size
+  - 5000x5000 resolution
+  - 16MB file size
 - Players MAY have smaller display capabilities and limit display support to only smaller thumbnail images
 - The thumbnail tiers are 
   - 128x128 JPG 
@@ -228,7 +228,7 @@ When are End Users also Artists?
 - The canonical thumbnails subfolder name is `/thumbnails` (lowercase `t`). Linkhosts, artists, and media library software creating new content SHOULD use this form.
 - Players and media management software SHOULD accept `/Thumbnails` (uppercase `T`) as a fallback when resolving thumbnail paths, for compatibility with older libraries or case-insensitive storage where the folder may have been created differently.
 - Artists SHOULD provide images that are square
-  - If not than resolutions e.g. 3000x3000 refers to maximum X Y resolution. For a non square image it means the maximum resolution of a single side is 3000. 
+  - If not than resolutions e.g. 5000x5000 refers to maximum X Y resolution. For a non square image it means the maximum resolution of a single side is 5000. 
 - Players SHOULD support non-square images by fitting them into a square frame (not cut off)
 - Artists MAY provide multiple alternate cover images with a release (e.g. equivalent to front and back image of a record sleeve)
 - Players MAY support showing alternate cover images but they don't have to 
