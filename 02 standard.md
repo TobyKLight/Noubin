@@ -432,9 +432,9 @@ Whilst the main functionality descriptions are in this document there is some sp
 - Then the player SHOULD proceed to section 3.6 PASSING A URL TO A MOBILE DEVICE
 - Otherwise if no fallbacks are possible the player SHOULD show an error with a user-readable message
 
-- Players MUST support writing NFC tags
-  - Even a bare-bones player must support this, why? 
-  - Because players MUST support associating a Noubin NFC tag with media. See section 3.4 MEDIA LIBRARY FUNCTIONS (of players)
+- Players MUST support writing NFC tags when the tag is rewritable
+  - In many cases users will supply blank rewriteable tags and to facillitate association the player should write a Local Noubin Key (text) to the tag and set it in the appropriate playable item `.noudata`file. 
+  - If the tag is locked / non-rewritable but does contain a readable text or URI string, association falls back to binding the existing string key in local `.noudata` metadata. See section 3.4 MEDIA LIBRARY FUNCTIONS (of players)
 
 
 ##### 3.2.1 Additional Performance Requirements for Hardware Noubin Players only: 
@@ -474,12 +474,17 @@ Whilst the main functionality descriptions are in this document there is some sp
   - This means media libraries are transferrable between Noubin Players of all kinds. Turn up at your friends house and share your music to their player. 
   - Note for internal only storage, players may use a different format if the developer wishes. But any export function must produce an export formatted according to section 4 NOUBIN MEDIA LIBRARY SPECIFICATIONS.
 - Players MUST implement a function where a user can associate a Noubin with a playable item
-  - This should create/set appropriate cross-compatible `.noudata` metadata in the media library, including `noubinKey` and `noubinKeyNormalised` (see sections 6.1–6.2 and section 4.7 UNIFYING MEDIA FILES WITH WEB RELEASE DATA FOR INCLUSION IN A LOCAL MEDIA LIBRARY)
-  - This means if a Noubin has an NFC tag with blank NDEF record the player must create one.
-  - Or if the user provide an NFC tag that already has a first NDEF record it must be ovewrriten. 
-  - See section 1.16 Local Noubin Key for recommended format
-  - Avoid collisions with existing `noubinKeyNormalised` values in the library by appending a random string. 
-  - Note the player will have to adapt to the available capacity of the NFC tag, some are as low as 48 bytes and may not fit a string with a long or complicated `playableItemTitle`. So the string should not be generated or set in the `.noudata` file until the moment the NFC tag capacity is confirmed. 
+  - Association means binding a Noubin Key to a playable item by setting `noubinKey` and `noubinKeyNormalised` in that item's `.noudata` file (see sections 6.1–6.2 and section 4.7 UNIFYING MEDIA FILES WITH WEB RELEASE DATA FOR INCLUSION IN A LOCAL MEDIA LIBRARY)
+  - Preferred behaviour: rewrite the tag with a Local Noubin Key (NDEF text record) and bind that. Fallback when rewriting is not possible (locked / non-rewritable tag): keep the existing chip content, normalise the readable URI or text string, and bind that as the key instead.
+  - Procedure:
+    1. Read the tag and attempt to extract any existing Noubin Key (URI or text) per section 6.1, and determine whether the tag is rewritable.
+    2. **Preferred — tag is rewritable:** write a Local Noubin Key onto the tag as an NDEF text record (see section 1.16 Local Noubin Key), then set `noubinKey` / `noubinKeyNormalised` from what was written on the **new** target playable item. This applies whether the tag was blank or already contained a key (overwrite). Adapt to tag capacity (some tags are as low as 48 bytes); do not finalise the string in `.noudata` until capacity is confirmed. Avoid collisions with existing `noubinKeyNormalised` values in the library by appending a random string.
+      - **Re-association:** if this tag was previously associated with a different playable item, the default behaviour is only to create the new association on the new target. Do **not** remove `noubinKey` / `noubinKeyNormalised` from the old playable item. That preserves cases where the user has associated multiple Noubins with one target playable item (or where another tag still carries the old key) — reassigning one Noubin MUST NOT break the others. If the player has a suitable UI it SHOULD inform the user that the tag was associated with media X and will now also / instead be associated with media Y (using display titles, e.g. `playableItemTitle`), without implying that X loses its key.
+    3. **Fallback — tag is locked / non-rewritable AND a URI or text Noubin Key can be read:** do not attempt to write. Set `noubinKey` to the literal extracted value and `noubinKeyNormalised` by applying section 6.2 on the target playable item. The end user may associate any such readable locked tag with any local playable item they choose (e.g. Artist A's locked Official Noubin remapped to Artist B's album, a playlist, podcast, etc.).
+      - **Re-association:** because the chip key cannot change, associating the same locked tag a second time (to a different playable item) MUST move the binding: clear `noubinKey` and `noubinKeyNormalised` from any other playable item(s) in the library that currently match this `noubinKeyNormalised`, then set them on the newly chosen item. (Otherwise two items would have the same key and it's ambiguous which should play on a tap). If the player has a suitable UI it SHOULD inform the user that the tag is already associated with media X and will now be changed to media Y (using the items' display titles, e.g. `playableItemTitle`).
+    4. **Cannot associate — tag is locked / non-rewritable AND blank / empty / unreadable as URI or text:** association cannot complete; the player SHOULD tell the user the tag has no usable key and cannot be written.
+  - Optional during association: if an image of the physical Noubin is available (e.g. captured by the user or already present for that object), the player MAY add it to the playable item's metadata as a `localCoverImage` (or `coverImage` / `itemCoverImage` as appropriate) entry with `isImageOfNoubin` = true. See `03 metadata-base.md`.
+  - Consequence of leaving keys in place on rewritable re-association: players MUST NOT treat "has a `noubinKey` / `noubinKeyNormalised` set" as proof that a playable item is currently associated with a physical Noubin. Items previously associated may retain stale keys that are no longer encoded on any Noubin the user still has. 
 - Players MAY implement further media and tag management functions including
   - Add media to the library
   - Put media into playlists
@@ -1213,6 +1218,8 @@ This is also why the standard permits factory locking of NFC tag content as this
 
 Tag locking may also benefit Artists selling Noubins on a larger scale (e.g. through retail channels) who are concerned about mishandling before sale. Locking them reduces the perceived risk that they were tampered with. 
 
-On the other hand locking prevents users doing things like overwriting the Noubin URL with direct streaming platform link if they do indeed always just want the streaming platform to come up.
+On the other hand locking prevents users doing things like overwriting the Noubin URL with a direct streaming platform link if they do indeed always just want the streaming platform to come up.
 
-So when locking is used the Noubin MUST be marketed as 'locked' or 'non-rewritable' so that end users know the limitations. See `Use of the name and logo.md`
+Locking does **not** prevent local remapping: when the preferred rewrite path is impossible, players MUST fall back to associating the existing readable URI or text Noubin Key with any local playable item the user chooses (see section 3.4). The chip content stays fixed; only the local `.noudata` binding changes.
+
+So when locking is used the Noubin MUST be marketed as 'locked' or 'non-rewritable' so that end users know the limitations (they cannot rewrite the chip, but they can still remap locally via the existing key). See `Use of the name and logo.md`
