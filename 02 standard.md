@@ -1039,11 +1039,9 @@ Both procedures share the same first step (section 6.1 Extracting the Noubin Key
 - The player MUST process the first valid NDEF record. 
 * **For NDEF URI:** 
   1. The player MUST fully expand the URI payload by resolving the URI Identifier Code byte into its full string prefix (e.g., `0x04` becomes `https://`).
-    2. The player MUST decode the fully expanded payload into a UTF-8 string. 
-  3. SPECIAL CASE **`noubin.com` redirect unwrapping (URL Noubin Keys only):** If the Noubin Key is a URL whose host is `noubin.com` or a subdomain of `noubin.com`, AND it contains a `?redirect` query parameter, the player MUST replace the Noubin Key with the URL-decoded value of that parameter (including any query parameters on the decoded URL) before continuing. See ADDENDUM1.
-    - NOTE `noubin.com` urls that don't contain a `?redirect` query parameter should be left as is and in that case `noubin.com` is treated as a regular linkhost. 
+  2. The player MUST decode the fully expanded payload into a UTF-8 string. 
   - NOTE At this point if there are query parameters or any other URL components beyond host and path (e.g. port numbers, `#` fragments, `;` matrix parameters, userinfo before `@`) this data remains and is included in the `noubinKey`
-  - NOTE Percent-encoded sequences (e.g. `%20`, `%2F`, `%3A`) are also left as-is in the `noubinKey`, whether they appear in the path, query, fragment, or elsewhere. Do not URL-decode the path at this stage. The only decoding in Phase 2 is the special `?redirect=` unwrap in step 3 above, which URL-decodes that parameter's value when replacing the Noubin Key.
+  - NOTE Percent-encoded sequences (e.g. `%20`, `%2F`, `%3A`) are also left as-is in the `noubinKey`, whether they appear in the path, query, fragment, or elsewhere. Do not URL-decode the path at this stage.
 * **For NDEF TEXT:**
     1. The player MUST read the initial Status Byte to determine the encoding and the length of the Language Code.
     2. The player MUST discard the Status Byte and the Language Code bytes.
@@ -1056,7 +1054,7 @@ At this point the `noubinKey` could be written back into a Noubin and the Noubin
 
 Each example shows what is encoded on the tag → the resulting **Noubin Key** (stored as `noubinKey`). Only Phase 1–2 applies here; no case folding, trimming, or protocol stripping yet.
 
-*NDEF URI records (prefix byte expanded, then redirect unwrap if applicable):*
+*NDEF URI records (prefix byte expanded):*
 - Prefix `0x04` (`https://`) + payload `artist.com/noubin/purple-rain/` → `https://artist.com/noubin/purple-rain/`
 - Prefix `0x02` (`https://www.`) + payload `artist.com/noubin/album/` → `https://www.artist.com/noubin/album/`
 - Prefix `0x03` (`http://`) + payload `artist.com/noubin/album/` → `http://artist.com/noubin/album/`
@@ -1070,9 +1068,7 @@ Each example shows what is encoded on the tag → the resulting **Noubin Key** (
 - Tag encodes `https://artist.com/noubin/purple%20rain/` → `https://artist.com/noubin/purple%20rain/` (percent-encoding in the **path** kept — not decoded to a space)
 - Tag encodes `https://artist.com/noubin/album?q=hello%20world` → `https://artist.com/noubin/album?q=hello%20world` (percent-encoding in the **query** kept)
 - Tag encodes `https://domain.com/noubin/artist/album/index.html` → `https://domain.com/noubin/artist/album/index.html` (path not canonicalised)
-- `noubin.com` as regular linkhost (no `?redirect=`): tag encodes `https://noubin.com/noubin/artist/album/fnj82974` → `https://noubin.com/noubin/artist/album/fnj82974`
-- `noubin.com` redirect wrapper: tag encodes `https://noubin.com/r/?redirect=https%3A%2F%2Fartist.com%2Fnoubin%2Falbum%2F` → `https://artist.com/noubin/album/` (unwrap in step 3 — here the `%3A%2F%2F` in the query **is** URL-decoded because it is the redirect target)
-- `noubin.com` redirect with query on target: tag encodes `https://noubin.com/r/?redirect=https%3A%2F%2Fartist.com%2Fnoubin%2Falbum%3Fversion%3D2` → `https://artist.com/noubin/album?version=2`
+- Tag encodes `https://noubin.com/noubin/artist/album/fnj82974` → `https://noubin.com/noubin/artist/album/fnj82974` (`noubin.com` as a regular linkhost)
 
 *NDEF Text records (language code bytes discarded, text payload kept as-is):*
 - Text payload `MyPlaylist01` → `MyPlaylist01`
@@ -1108,7 +1104,6 @@ The resulting string is the **Normalised Noubin Key**. Players MUST perform a by
 - Should Noubin Key normalisation add a trailing slash? Yes — see step 7. Do **not** strip `index.html` or other filenames here; that is only for HTTP fetch in section 6.3. A tag ending in `…/album/index.html` therefore normalises to a different key than `…/album/`.
 - Should non-ASCII letters be lowercased? No — only ASCII `A-Z` → `a-z` (step 1).
 - Should `%2f` in the path be decoded to `/`? No — leave it encoded so it does not invent new path segments (step 6).
-- Should Noubin Key normalisation of `noubin.com` URLS do the special unwrapping procedure if they contain a ?redirect query paramater? YES this MUST happen before Noubin Key Normalisation, otherwise after the query parameters are dumped  `noubin.com` wrapper URLs would all collapse to the same key (e.g. `noubin.com/r/`).
 - Section 6.3 Noubin URL Normalisation uses additional path rules for HTTP fetch (including stripping `index.html`). Do not apply those fetch-only rules here.
 
 **Noubin Key Normalisation Examples:**
@@ -1134,9 +1129,7 @@ Each example shows the **Noubin Key** (after Phase 1–2 extraction, stored as `
 - Trailing slash added: `https://domain.com/noubin/artist/album` > `domain.com/noubin/artist/album/`
 - Empty path becomes `/`: `https://artist.com` > `artist.com/`
 - Filename on path left as-is (not stripped here): `https://domain.com/noubin/artist/album/index.html` > `domain.com/noubin/artist/album/index.html/`
-- `noubin.com` as regular linkhost (no `?redirect=`): `https://noubin.com/noubin/artist/album/fnj82974` > `noubin.com/noubin/artist/album/fnj82974/`
-- `noubin.com` redirect wrapper — tag encodes `https://noubin.com/r/?redirect=https%3A%2F%2Fartist.com%2Fnoubin%2Falbum%2F` but after Phase 2 unwrap the Noubin Key is `https://artist.com/noubin/album/` > `artist.com/noubin/album/`
-- `noubin.com` redirect with query on target — tag encodes `https://noubin.com/r/?redirect=https%3A%2F%2Fartist.com%2Fnoubin%2Falbum%3Fversion%3D2`, after unwrap Noubin Key is `https://artist.com/noubin/album?version=2` > `artist.com/noubin/album/`
+- `noubin.com` as regular linkhost: `https://noubin.com/noubin/artist/album/fnj82974` > `noubin.com/noubin/artist/album/fnj82974/`
 
 #### 6.3 Noubin URL Normalisation
 
@@ -1145,8 +1138,7 @@ Applied when a web-capable player needs to fetch `web.noudata` from the internet
 The player MUST apply the following in exact order:
 
 1. Upgrade to HTTPS: If the URL begins with `http://`, the player MUST substitute `https://`.
-2. If this is a `noubin.com` redirect wrapper URL, apply the same redirect unwrapping as in 6.1 Phase 2 step 3 before continuing (so the fetch targets the artist's URL, not `noubin.com/r/`).
-3. Metadata URL resolution:
+2. Metadata URL resolution:
   1. Remove and discard the fragment: delete `#` and everything after it (fragments are not sent in HTTP requests).
   2. Remove and store query parameters: If the URL contains query parameters (e.g. `?ref=nfc`), remove and store them.
   3. Remove userinfo and port from the authority if present (same rules as 6.2 step 4.3–4.4), leaving `https://` + host + path. Path matrix parameters (`;`) remain.
@@ -1154,7 +1146,7 @@ The player MUST apply the following in exact order:
   5. Percent-decode the path as in 6.2 step 6 (decode `%XX` except leave `%2f` / `%2F` encoded). Case-fold ASCII in the URL first if not already done, or treat `%2F` and `%2f` the same when deciding not to decode.
   6. **Path Normalization:** Treat the URL as a directory path. If it does not end in a trailing slash (`/`), append one. If the final path segment contains a period (`.`) followed by an extension (e.g. `index.html`, `page.php`), strip that entire filename before appending the trailing slash.
   7. **Append `web.noudata`:** Append `web.noudata` to the path.
-  8. **Re-append query parameters:** If query parameters were stored in step 3.2, append them again.
+  8. **Re-append query parameters:** If query parameters were stored in step 2.2, append them again.
 
 The resulting URL is used for the HTTPS GET request.
 
@@ -1170,41 +1162,20 @@ The resulting URL is used for the HTTPS GET request.
 - `https://domain.com/noubin/artist/album?ref=nfc#track-3` > `https://domain.com/noubin/artist/album/web.noudata?ref=nfc`
 - `https://artist.com:8443/noubin/album/` > `https://artist.com/noubin/album/web.noudata` (port stripped for fetch)
 - `https://user:pass@artist.com/noubin/album/` > `https://artist.com/noubin/album/web.noudata` (userinfo stripped for fetch)
-- `https://noubin.com/r/?redirect=https%3A%2F%2Fartist.com%2Fnoubin%2Falbum%3Fversion%3D2` → `https://artist.com/noubin/album/web.noudata?version=2`
 - `https://noubin.com/noubin/artist/album/fnj82974` > `https://noubin.com/noubin/artist/album/fnj82974/web.noudata`
 - `https://noub.in/fnj82974/` > `https://noub.in/fnj82974/web.noudata`
 
-# ADDENDUM1 DEEP LINKING AND SPECIAL REDIRECT CASE 
+# ADDENDUM1 DEEP LINKING AND OS RESTRICTIONS
 
-Why do players need special functionality to handle `noubin.com` links with `?redirect=` query parameters? 
-This is a long one
+Software Noubin Players face a practical limitation from OS deep linking rules.
 
-
-- At the time of writing there is a potential issue with Software Noubin Player deep links. 
-- Apps must register with operating systems the domains for which URLS should not open in a general browser but instead be redirected to the app. 
-  - This is known generally as Deep Linking although each OS has it's own specific name and implementation. 
-- Note this redirection behaviour is relevant only when the app does not have focus. 
-  - When an app has focus than typically it is able to intercept all NFC payloads directly. (Which is how software players can play non-URL payloads linked to local media) 
-- The main problem here is that apps can only deep link to domains they can prove they are associated with. 
-  - Via a metadata file at the domain that authorises the app
-  - Which is nominally a good security feature. For example it prevents someone making a malicious app that takes over links to a banking app
-- Because the Noubin standard allows for anyone to host a Noubin URL, including artists to host at their own domain, there is no single or finite list of domains that Software Noubin Players can register deep links for. 
-  - And on the other side it's unworkable that all of these domains could be updated with lists of all the valid Software Noubin Player apps
-- SO for the specific function that the OS redirects noubin links to Software Noubin Players when they don't have focus here is our proposed solution:
-- We solve this by having a central domain e.g. `noubin.com`
-  offering a redirect service goes to the original Noubin URL domains 
-  - e.g. `https://noubin.com/r/?redirect=https%3A%2F%2Fartist.com%2Fnoubin%2Falbum1%3Fversion%3D2` which will redirect to `https://artist.com/noubin/album1?version=2`
-  - At `noubin.com` we maintain a single list of the Software Noubin Player app IDs 
-  - Software Noubin Players can then successfully register to intercept `noubin.com` links with their OS  
-- This introduces two problems: 
-- A) infrastructure maintenance, including maintaining central list of approved Software Noubin Players 
-  - If the standard is successful than this may still be the best path forward
-  - But it involves some work, what does an 'approved player' look like, how much should we check etc? 
-  - Hence why today nothing like this is yet implemented in the standard; if there is demand for this it will involve an extension to the standard and the setup of the appropriate infrastructure at `noubin.com`.
-- B) The bigger problem, that we have to think about now, is that centralisation is also a potential issue with playback. If Noubins are encoded with `noubin.com` redirect links but rely on `noubin.com` to really do the redirect, then if `noubin.com` goes down all online noubin activity is halted for all Noubins, even those using linkhosts elsewhere. 
-  - This is also undesirable centralisation and allows the future operators of `noubin.com` to potentially censor and remove links, deactivating online functions of Noubins people already made and bought.
-  - Hence why the special requirement for noubin web activity exist: players MUST unwrap `noubin.com` redirect URLs locally as defined in sections 6.1, 6.2 and 6.3, rather than relying on `noubin.com` to perform the redirect at fetch time.
-  - Then it doesn't matter if `noubin.com` is up or has removed the redirect, regular players at least will still find the artists intended content. (although it may still be broken for browsers)
+- Apps must register with the operating system which domains should open in the app instead of a general browser when a URL is opened (including from an NFC tap when the app does not have focus). This is generally called deep linking; each OS has its own name and implementation.
+- Apps can only deep link to domains they can prove they are associated with (typically via a metadata file hosted on that domain that authorises the app). That is a useful security feature — it prevents a malicious app from claiming bank or other app links.
+- When a Software Noubin Player **has focus**, it can usually intercept NFC payloads directly, including non-URL text keys used for local-only playback.
+- When the app **does not have focus**, the OS may hand a Noubin URL to the browser instead of the player unless that URL's domain is registered for deep linking by that app.
+- Because the Noubin standard allows anyone to host a Noubin URL (including artists on their own domains), there is no single finite list of domains Software Noubin Players can register — and it is not practical for every artist/linkhost domain to list every valid player app.
+- Consequence: Software Noubin Players may only reliably intercept Noubin URL taps when they already have focus. Otherwise the fallback is browser behaviour (open the Noubin URL as a normal web page). See `01 user experience.md`.
+- The standard does **not** attempt to solve this for now. If there is demand we could look at in future. 
 
 # ADDENDUM2 LOCKED TAGS AND TYPE 4 TAG USE CASES
 
