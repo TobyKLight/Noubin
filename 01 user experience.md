@@ -17,10 +17,11 @@ A) When a user taps a Noubin on a Noubin Player
 	- If the user agrees open the Noubin URL and show the user info about the release and where to download/purchase it. 
 	- If direct download is available download the media and add to the library 
 
-B) When a user taps a Noubin on a general computing device (phone/computer) without a Software Noubin Player 
+B) When a user taps a Noubin on a general computing device (phone/computer)
 - The Noubin URL should be opened by the web browser which presents the release metadata and links as a normal web page 
+- The user can then tap on the preferred distribution platform (including streaming platforms) to hear or buy the music. 
 
-*Note that Software Noubin Players may only function correctly when they have focus and can intercept NFC tap data. OS deep linking restrictions may prevent them intercepting Noubin URLs when they don't have focus, in which case the fallback behaviour B will occur. (See ADDENDUM1 of `02 standard.md`)*
+There is the possibility of software Noubin players as apps which would offer experience A on a computer/phone. But note due to the way OS's process NFC taps and deep links they may only be able to intercept the NFC tap when they have focus. (See ADDENDUM1 of `02 standard.md`)*
 
 
 #### LOADING MEDIA EXPERIENCE
@@ -78,7 +79,7 @@ The standard as written at the moment only defines technical behaviour up to lev
 
 A Noubin media library should be in a standard format that is portable between all Noubin Players (both hardware players and apps). So if they upgrade or change players in future their existing library and Noubins just work. 
 
-It's anticipated that some Hardware Noubin Players will explore form factors and UI that are great for playing music, but don't lend well to setting up and managing a media library. e.g. without screens. A benefit of a standard library format users can easily do the media management on a desktop computer or another player with more suitable user interface. 
+It's anticipated that some Hardware Noubin Players will explore form factors and UI that are great for playing music, but don't lend well to setting up and managing a media library. e.g. without screens. A benefit of a standard library format is that users can easily do the media management on a desktop computer or another player with more suitable user interface. 
 
 The media library system should extend familiar file system concepts where possible for at least basic functionality. E.g. if a user simply drops media files into the library using the file picker then players can manually select and play it. 
 
@@ -90,9 +91,10 @@ Both users and artists can
 
 Rewritable tags are encouraged. This gives the end user the most choice to define the behaviour of their Noubin. For example if they don't have a Noubin Player and really prefer using a major streaming platform they can replace the Noubin URL with the major streaming platform link. 
 
-Note that even non-rewritable tags can be associated with any media in a library. So if a user bought Artist As Noubin they can associate it with Artist Bs music if they feel like it, or a playlist, compilation, podcast, mixtape etc. 
+Note that even non-rewritable tags can be associated with any media in a library. So if a user bought the Noubin of Artist X they can choose to associate it with media from Artist Y, or also a playlist, compilation, podcast, mixtape etc. 
 
 Users can become artists by publishing their own Noubins - simply put the audio file somewhere online where it's freely downloadable, publish a free Noubin URL and write it to an NFC tag. This can be used to e.g. give your friend a mixtape. In future web connected Noubin Players could let you do this entirely from the player. 
+
 #### PRIVATE EXPERIENCE
 
 Playing music locally should never involve internet access or any web server, for a totally private experience without tracking or ads. 
