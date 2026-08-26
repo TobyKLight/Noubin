@@ -6,7 +6,14 @@ aimed at artists who make music and audio content.
 Based on NFC technology. 
 
 This repository contains the documents defining the Noubin open standard. 
-The open source reference software implementation (Plippa) will hopefully be online soon. 
+
+You can make Noubin URLS for free at [https://noubin.com/](https://noubin.com/). 
+
+Noubins can be tapped on phones or played with dedicated Noubin hardware players. 
+
+The first Noubin hardware player is called Plippa. 
+We plan to release the Plippa software open source as a reference implementation of the Noubin standard. 
+You can see the status of the [Plipp aproject here](https://nowwemake.com/plippa). 
 
 ----
 ### Status
