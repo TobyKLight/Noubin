@@ -127,19 +127,19 @@ ROOT
 
 ##### `playableItemFolderSafeTitle` (string)
 - Optional
-- If the `playableItemTitle` contains characters that are not permitted in filenames under section 1.26 Safe file and folder names of `02 standard.md` then the player/media management library should do a conversion to safe characters that will be used for local library file paths e.g `D:/Music/<artist>/<release>/`
+- If the `playableItemTitle` contains characters that are not permitted in filenames under section 1.28 Safe file and folder names of `02 standard.md` then the player/media management library should do a conversion to safe characters that will be used for local library file paths e.g `D:/Music/<artist>/<release>/`
 - Setting this field manually is useful if automatic conversion by players is unlikely to produce a satisfactory result. 
   - e.g. if the release is titled `HE??O` then automatic conversion to a folder/file name would probably just drop the ?s and put it in folder called `/HEO/`. By manually setting `HELLO` in this field then the release folder will be called `/HELLO/`
-- If present, metadata editor UX should prevent entering values that are not folder safe as per `02 standard.md` section 1.26
+- If present, metadata editor UX should prevent entering values that are not folder safe as per `02 standard.md` section 1.28
 
 ##### `playableItemURLSafeTitle` (string)
 - Optional
 - A preferred URL path segment form of the playable item / release title for use in Noubin URLs (e.g. `noubin.com/n/<artist>/<release>/ABCD1234`)
-- MUST follow section 1.28 Safe URL path segments of `02 standard.md` (preferred form: lowercase ASCII letters, digits, and hyphens)
+- MUST follow section 1.30 Safe URL path segments of `02 standard.md` (preferred form: lowercase ASCII letters, digits, and hyphens)
 - Or if the artist prefers they can set an editorial slug here even when the display title would already percent-encode cleanly, as percent encoding still makes for a less readable URL. Note also some linkhosts may not support percent encoding. 
   - e.g. if the release title is `HE??O` then `playableItemURLSafeTitle` might be `hello`
   - e.g. if the release title is `봄날` then `playableItemURLSafeTitle` might be `spring-day`
-- If present, linkhosts SHOULD prefer this value when constructing the Noubin URL and UX should prevent entering values that are not URL safe or supported by the linkhost URL scheme as per `02 standard.md` section 1.28
+- If present, linkhosts SHOULD prefer this value when constructing the Noubin URL and UX should prevent entering values that are not URL safe or supported by the linkhost URL scheme as per `02 standard.md` section 1.30
 
   
 ##### `referToReleaseNoudata` (string)
@@ -339,19 +339,19 @@ Note if you set arrays (e.g. `primaryArtists` or `contributors` array) on both a
 
 ##### `primaryArtistFolderSafeName` (string)
 - Optional
-- If the first `primaryArtistName` or `primaryArtistOverrideName` contains characters that are not permitted in filenames under section 1.26 Safe file and folder names of `02 standard.md` then the player/media management library should do a conversion to safe characters that will be used for local library file paths e.g `D:/Music/<artist>/<release>/`
+- If the first `primaryArtistName` or `primaryArtistOverrideName` contains characters that are not permitted in filenames under section 1.28 Safe file and folder names of `02 standard.md` then the player/media management library should do a conversion to safe characters that will be used for local library file paths e.g `D:/Music/<artist>/<release>/`
 - Setting this field manually is useful if automatic conversion by players is unlikely to produce a satisfactory result. 
   - e.g. if the artists name is `MYSTERY *` then automatic conversion to a folder name would probably just drop the * and put it in folder called `/MYSTERY/`, by setting "MYSTERY STAR" in this field then the artist folder will be called `/MYSTERY STAR/`
-- If present, linkhosts UX should prevent entering values that are not folder safe as per `02 standard.md` section 1.26
+- If present, linkhosts UX should prevent entering values that are not folder safe as per `02 standard.md` section 1.28
 
 ##### `primaryArtistURLSafeName` (string)
 - Optional
 - A preferred URL path segment form of the primary artist name for use in Noubin URLs (e.g. `noubin.com/n/<artist>/<release>/ABCD1234`)
-- MUST follow section 1.28 Safe URL path segments of `02 standard.md` (preferred form: lowercase ASCII letters, digits, and hyphens)
+- MUST follow section 1.30 Safe URL path segments of `02 standard.md` (preferred form: lowercase ASCII letters, digits, and hyphens)
 - Or if the artist prefers they can set an editorial slug here even when the display title would already percent-encode cleanly, as percent encoding still makes for a less readable URL. Note also some linkhosts may not support percent encoding. 
 - e.g. if the artist name is `MYSTERY *` then `primaryArtistURLSafeName` might be `mystery-star`
 - e.g. if the artist name is `방탄소년단` then `primaryArtistURLSafeName` might be `bts` (note can also add "Bangtan Sonyeondan" to `alternateSearchKeywords`)
-- If present, linkhosts SHOULD prefer this value when constructing the Noubin URL and UX should prevent entering values that are not URL safe or supported by the linkhost URL scheme as per `02 standard.md` section 1.28
+- If present, linkhosts SHOULD prefer this value when constructing the Noubin URL and UX should prevent entering values that are not URL safe or supported by the linkhost URL scheme as per `02 standard.md` section 1.30
 
 ##### `alternateSearchKeywords` (array: string)
 - Optional
@@ -467,7 +467,7 @@ Note if you set arrays (e.g. `primaryArtists` or `contributors` array) on both a
 - a short text description to accompany the release/track
 - Player can choose to show this contextually based on the `releaseProfile` 
 - E.g. users browsing podcast episodes probably do value reading a short description of the episode, this is less common for music
-- Multiline entry is possible see 02 standard.md section 1.20
+- Multiline entry is possible see 02 standard.md section 1.22
 
 ##### `categories` (array)
 - optional
@@ -481,7 +481,7 @@ Note if you set arrays (e.g. `primaryArtists` or `contributors` array) on both a
 ##### `legalNotice` (string)
 - optional 
 - legal text 
-- Multiline entry is possible see 02 standard.md section 1.20
+- Multiline entry is possible see 02 standard.md section 1.22
 
 ##### `identifiers` (array)
 - optional
@@ -493,7 +493,7 @@ Note if you set arrays (e.g. `primaryArtists` or `contributors` array) on both a
 ##### `additionalCreditsText` (string)
 - optional
 - free text for the creator to put additional credits information in unstructured format
-- Multiline entry is possible see 02 standard.md section 1.20
+- Multiline entry is possible see 02 standard.md section 1.22
 - e.g. "Special thanks to Dave for letting us use his snowmobile to get to the synthesiser repair shop"
 
 
@@ -504,9 +504,9 @@ Note if you set arrays (e.g. `primaryArtists` or `contributors` array) on both a
 - `localCoverImage` is a child of `localPlaybackData` and represents images set by the user for this release or playlist. If set it overrides the `coverImage`.
 - `itemCoverImage` is a child of the `mediaList` array and represents per track/item images to be shown only when that item is playing. If set it overrides both `coverImage` and `localCoverImage`. 
 - All of these are optional
-- See `02 standard.md` section 1.25 Supported image formats for more information about acceptable image formats and the role of thumbnails
+- See `02 standard.md` section 1.27 Supported image formats for more information about acceptable image formats and the role of thumbnails
 - Note regarding thumbnails: only the original image NOT thumbnails is linked in the metadata file.
-  - The presence of thumbnails or not is defined by the actual thumbnail image file presence in the `/thumbnails` subfolder using naming conventions as defined in `02 standard.md` section 1.25. Players SHOULD also check `/Thumbnails` with uppercase T. 
+  - The presence of thumbnails or not is defined by the actual thumbnail image file presence in the `/thumbnails` subfolder using naming conventions as defined in `02 standard.md` section 1.27. Players SHOULD also check `/Thumbnails` with uppercase T. 
   - Small design note why isn't the `coverImage` object here just the array itself? To support future expansion of this object if we add moving cover images or some other more complex definition of multiple image slideshow behaviour etc. 
 
 Structure
@@ -538,12 +538,12 @@ coverImage (object)
     - The filename of the primary cover image for searching in the current release folder
     - This should be checked first and if not present web capable players and media management should then query the `imageWebURL` to find the image (after checking with the user that online access is ok).  
       - If an image is downloaded it should be placed in the library folder and the `imageLocalFilename` should be written for future. 
-    - If thumbnails are available they should be in `/thumbnails` relative path off this image as per `02 standard.md` section 1.25
+    - If thumbnails are available they should be in `/thumbnails` relative path off this image as per `02 standard.md` section 1.27
   - `imageWebURL`
     - Required
       - either this or `imageLocalFilename` is required, otherwise this element of the `images` array is not valid and should be ignored
     - The web URL of the primaryCoverImage where it should be available for direct download
-    - If thumbnails are available they should be in `/thumbnails` relative path off this URL as per `02 standard.md` section 1.25
+    - If thumbnails are available they should be in `/thumbnails` relative path off this URL as per `02 standard.md` section 1.27
     - This property generally should not be set in the `localCoverImage` object as in principle the user would drag in images from their local file system they would never be web sources, so `imageLocalFilename` would always be set. 
 
 ##### `isImageOfNoubin` (boolean)
@@ -616,7 +616,7 @@ Structure
   - This .noudata file represents a dynamic playlist
   - Use this string to conduct a search of the media library and load the results as a playlist
   - Respect other `localPlaybackData` settings notably the `shuffle` property
-- See section 1.27 Dynamic Playlist in `02 standard.md`
+- See section 1.29 Dynamic Playlist in `02 standard.md`
 
 `userNotes` is defined below
 
@@ -782,7 +782,7 @@ The objects `itemCredits`,  `itemUserNotes` and `itemCoverImage` are defined abo
 ##### `lyricsTranscript` (string)
 - optional
 - text of the lyrics (of music) or transcript (of spoken media)
-- Multiline entry is possible see 02 standard.md section 1.20
+- Multiline entry is possible see 02 standard.md section 1.22
 - If available, dynamic lyrics/transcript are preferred as part of a `cueLists` entry with `cueListType` = `text`. 
 
 ##### `musicalData` (object)
@@ -908,7 +908,7 @@ cueLists (array)
       - Multiline is discouraged but possible, so MAY contain line ending / new line characters. Common in subtitle formats e.g.
         - "- are you ready?
           -I was born ready"
-      - For newline char encoding see 02 standard.md section 1.20  
+      - For newline char encoding see 02 standard.md section 1.22  
     - For credits of music (e.g. tracks in a mix) then this `cueTextSpans` array should contain a single element in the format "Title - Primary Artist" e.g. "Livin’ La Vida Loca - Ricky Martin" 
   - `cueURL` (string)
     - Optional

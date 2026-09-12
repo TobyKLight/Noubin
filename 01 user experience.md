@@ -89,11 +89,16 @@ Both users and artists can
 - buy cheap and common rewritable NFC tags as stickers 
 - use those to make their own Noubins from suitable objects
 
+There are two kinds of Noubin
+- **Private Noubin** — Only work on the media library it was created for, contains a code specific to that media collection. Can create these on Noubin Players for their own collection. 
+- **Public Noubin** — Works on any (internet connected) Noubin Player AND on phones. This is because the code it contains is actually a URL. it works as a local code but also works as a normal internet link. Note local playback still requires owning the media, but the URL links to platforms where it can be bought to make this easier. Creating Public Noubins involves creating the appropriate Noubin URL first and writing it to the NFC tag. 
+(Up to 10 Noubin URLs can be made for free on [Noubin.com](https://noubin.com/) or self-hosted on your own website)
+
 Rewritable tags are encouraged. This gives the end user the most choice to define the behaviour of their Noubin. For example if they don't have a Noubin Player and really prefer using a major streaming platform they can replace the Noubin URL with the major streaming platform link. 
 
 Note that even non-rewritable tags can be associated with any media in a library. So if a user bought the Noubin of Artist X they can choose to associate it with media from Artist Y, or also a playlist, compilation, podcast, mixtape etc. 
 
-Users can become artists by publishing their own Noubins - simply put the audio file somewhere online where it's freely downloadable, publish a free Noubin URL and write it to an NFC tag. This can be used to e.g. give your friend a mixtape. In future web connected Noubin Players could let you do this entirely from the player. 
+Users can become artists by publishing their own Public Noubins - simply put the audio file somewhere online where it's freely downloadable, publish a free Noubin URL and write it to an NFC tag. This can be used to e.g. give your friend a mixtape. In future web connected Noubin Players could let you do this entirely from the player. 
 
 #### PRIVATE EXPERIENCE
 
