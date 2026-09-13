@@ -1,9 +1,8 @@
 <img width="300" alt="Noubin Logo" src="https://github.com/user-attachments/assets/1da4e295-836d-4135-ba8d-d094ad3b3998" />
 
 # NOUBIN 
-Local-first physical media hyperlink standard, 
-aimed at artists who make music and audio content.
-Based on NFC technology. 
+Open standard for physical NFC objects that play digital music. 
+Or other audio content e.g. mixtapes, podcasts, audiobooks. 
 
 This repository contains the documents defining the Noubin open standard. 
 
@@ -13,7 +12,7 @@ Noubins can be tapped on phones or played with dedicated Noubin hardware players
 
 The first Noubin hardware player is called Plippa. 
 We plan to release the Plippa software open source as a reference implementation of the Noubin standard. 
-You can see the status of the [Plipp aproject here](https://nowwemake.com/plippa). 
+You can see the status of the [Plippa project here](https://nowwemake.com/plippa). 
 
 ----
 ### Status
