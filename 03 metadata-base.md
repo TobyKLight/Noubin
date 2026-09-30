@@ -34,15 +34,16 @@ Structure overview (selectively expanded)
 ROOT
 |-- _whatAmILookingAt (string: fixed data see below)
 |-- noudataVersion (string)
+|-- noudataType (enum: release | userPlaylist | looseTrack | linkTrack)
 |-- noubinKey (string)
 |-- noubinKeyNormalised (string)
 |-- playableItemTitle (string)
 |-- playableItemFolderSafeTitle (string)
 |-- playableItemURLSafeTitle (string)
+|-- playableItemProfile (enum: music | podcast | audiobook | mix | other)
 |-- referToReleaseNoudata (string)
 |-- releaseData (object)
 |    |
-|    |-- releaseProfile (enum: music | podcast | audiobook | mix | other)
 |    |-- credits (object: defined below)
 |    |-- coverImage (object: defined below)
 |    |-- releasePlatforms (array)
@@ -92,9 +93,36 @@ ROOT
 - Required
   - If omitted up to the Player if it continues or not. 
   - (If the standard turns out to be highly volatile it may be impractical to continue without this)
-- a string with the version of Noubin standard this `.noudata` file was made to conform to e.g. "0.1.0"
+- a string with the version of Noubin standard this `.noudata` file was made to conform to e.g. "0.2.0"
 - uses semver standard
-- do not prefix with a letter, so it's "0.1.0" not "v0.1.0"
+- do not prefix with a letter, so it's "0.2.0" not "v0.2.0"
+
+##### `noudataType` (enum: `release | userPlaylist | looseTrack | linkTrack`)
+- Optional but highly reccomended. Declares what kind of playable item this file is.
+- Enum values:
+  - `release`: a release from an artist, may have one track or multiple
+    - MUST have `releaseData`  
+  - `userPlaylist`: A collection of 1 or more tracks created by a user. release data comes from the individual tracks original .noudata source. 
+    - MUST NOT have  `releaseData` 
+    - Dynamic playlists using the `searchString` function are also set as `userPlaylist` type 
+  - `looseTrack`: a track a user put in their media library that is not associated with a release
+    - has exactly one `mediaList` item;
+    - MUST NOT have `releaseData` or `itemCredits`
+      - What if the user wants to set credits/album etc for this track? Then the editor should make it a `release` and update it to have the minimum `releaseData`. Then it gets organised into a release folder etc. 
+  - `linkTrack`: special case when this .noudata file is associated with a track that is in a properly set up release, but the user wants to associate a Noubin with a specific track instead of the whole release. 
+    - has exactly one `mediaList` item; 
+    - REQUIRES `referToReleaseNoudata`to be set to a valid .noudata file with `releaseData` 
+    - MUST NOT have `releaseData` or `itemCredits`
+- Note on taxonomy: a music industry single or EP with one track is still a `release`. A loose track in the users library where we don't have the release data is a `looseTrack`. 
+- If `noudataType` is omitted, infer per `02 standard.md` section 4.9.
+  - An unknown enum value is treated as omitted and the type is inferred. There is deliberately no `other` value.
+- Invalid combinations invalidate the declared type; ignore it, infer instead as per section 4.9, and warn when editing metadata:
+  - `release` without `releaseData`;
+  - `looseTrack` or `linkTrack` with a `mediaList` length other than one;
+  - `linkTrack` without `referToReleaseNoudata`;
+- When the user wants to add `releaseData` to a `looseTrack` a player or MediaManager MAY allow it, but change the `noubinType` to `release` and also ideally reorganise the file into a release folder. 
+- If a `noubinType` that shuold not have `releaseData` does have it, the declared `noubinType` wins for classification. Players SHOULD preserve `releaseData` on write.
+- `web.noudata` MUST be `release` or omit this property. Linkhosts MUST NOT publish the other three types.
 
 ##### `noubinKey` (string)
 - Optional in local `.noudata` files; MUST NOT appear in `web.noudata` files
@@ -123,6 +151,7 @@ ROOT
 - a string that is the display name of this playable item
 - For a release it MUST be the name of the release (e.g. name of the album)
 - For a playlist it will be the name of the playlist
+- For a `looseTrack` or `linkTrack` it is the display title of that track.
 - If omitted Player or media library should use release data or media file names to generate a title and set this property
 
 ##### `playableItemFolderSafeTitle` (string)
@@ -141,10 +170,19 @@ ROOT
   - e.g. if the release title is `봄날` then `playableItemURLSafeTitle` might be `spring-day`
 - If present, linkhosts SHOULD prefer this value when constructing the Noubin URL and UX should prevent entering values that are not URL safe or supported by the linkhost URL scheme as per `02 standard.md` section 1.30
 
+#### `playableItemProfile` (enum: `music | podcast | audiobook | mix | other`)
+- Optional. Says what kind of audio this playable item is. If missing or unrecognised, use `other` (expect extensions).
+- Players use it for `unite` filename heuristics (section 4.7.1 of `02 standard.md`), resume defaults, the "show lyrics" vs "show transcript" label for text cues, suggested primary-artist and credit role labels, and library grouping/import placement (section 4.4 of `02 standard.md`).
+- For `release`, this is the profile of the release.
+- For `looseTrack`, this is the profile of that track.
+- For `linkTrack`, omit this property; the profile is inherited from the referred release and any value here is ignored.
+- For `userPlaylist`, this property is ignored; each item takes the profile of its authoritative source.
+- This is not meant to be a perfect or exhaustive list. Other types of productions, such as comedy, radio plays or speech, can use the closest applicable profile and be made searchable with a relevant category. The profile enum may be extended in future if there is demand.
   
 ##### `referToReleaseNoudata` (string)
 - Optional
 - A string that contains a relative file path
+- REQUIRED when `noudataType` is `linkTrack`. MUST NOT be present when `noudataType` is `looseTrack`, `userPlaylist` or `release`.
 - Refers to a metadata file for a release 
 - Used when a user associates a Noubin with a specific file in a release. Then it needs its own `noudata` file with unique `noubinKey`, `noubinKeyNormalised`, and optionally `localPlaybackData`
 - Instead of duplicating all the other metadata like `credits` `coverImage` `releaseData` etc this tells the player to look for an authoritative `_<release>.noudata` file at the location. 
@@ -160,14 +198,11 @@ The other three root objects `releaseData`, `localPlaybackData`, and `mediaList`
 
 - child of root
 - Optional
-  - If present that means this is a release (e.g. an album, single, compilation or some other release from an artist)
-  - If omitted then this is a user created playable item like a playlist
 
 Structure
 ```
 releaseData (object)
 |
-|-- releaseProfile (enum: music | podcast | audiobook | mix | other)
 |-- credits (object: defined below)
 |-- coverImage (object: defined below)
 |-- releasePlatforms (array)
@@ -188,15 +223,6 @@ releaseData (object)
 
 `credits` object defined in their own sections below
 `coverImage` object defined in its own section below
-
-##### `releaseProfile` (enum: `music | podcast | audiobook | mix | other`)
-- Optional
-  - If omitted assume `other`
-  - Expect extensions may be implemented here in future, so if it's an unrecognised enum value treat as `other`
-- Used to inform the `unite` function that matches `web.noudata` to actual media files purchased from a store, as there are different industry conventions around filenames for e.g. music vs audiobooks. See `02 standard.md` section 4.7.1 Reference: heuristics for uniting `mediaTitle` and `uniteData` with actual media filenames
-- This is not meant to be a perfect or exhaustive list. Could theoretically include e.g. comedy, radio play, speech etc but those types of productions are not linked to their own distribution channel conventions at the moment. For example comedy recordings are often distributed through the existing music or podcast channels and will use file namings from those worlds.
-  - You can still make "comedy" searchable by including that as a relevant category in the `categories` section (as a tag, genre etc)
-- We of course extend this in future if there is demand.
 
 ##### `releasePlatforms` (array)
 - optional 
@@ -251,6 +277,7 @@ releaseData (object)
     - Which is to say each property inside  `itemCredits` completely replace the release level `credits` property if it exists.
     - So if included the `primaryArtists` array of the track completely replaces the `primaryArtists` array of the release. (Not just appending to it)
     - This means you can have "various artists" as the primary artist of a compilation and each individual artist team listed fully on each track. 
+- At import if there is no information to generate credits (e.g. no embedded metadata, just filename) consider making a `looseTrack` without `releaseData` rather than than writing a placeholder such as "Unknown Artist".
 
 Structure
 ```
@@ -326,11 +353,11 @@ Note if you set arrays (e.g. `primaryArtists` or `contributors` array) on both a
 - Ordered in desired display order
 
 - This is a display list only — no roles on these entries. Put role-labelled people (songwriter, narrator, guest, engineer, etc.) in `contributors`.
-- Guidance by `releaseProfile` for which name(s) typically belong here (media management software and Noubin URL creation tools SHOULD suggest this in UX):
-  - for `releaseProfile` = `music` → the performer(s)
-  - for `releaseProfile` = `podcast` → the host(s)
-  - for `releaseProfile` = `audiobook` → the author(s)
-  - for `releaseProfile` = `mix` → the DJ / performer of the mix
+- Guidance by `playableItemProfile` for which name(s) typically belong here (media management software and Noubin URL creation tools SHOULD suggest this in UX):
+  - for `music` → the performer(s)
+  - for `podcast` → the host(s)
+  - for `audiobook` → the author(s)
+  - for `mix` → the DJ / performer of the mix
 
 ##### `primaryArtistOverrideName` (string)
 - Optional
@@ -465,7 +492,7 @@ Note if you set arrays (e.g. `primaryArtists` or `contributors` array) on both a
 ##### `description` (string)
 - optional
 - a short text description to accompany the release/track
-- Player can choose to show this contextually based on the `releaseProfile` 
+- Player can choose to show this contextually based on `playableItemProfile`.
 - E.g. users browsing podcast episodes probably do value reading a short description of the episode, this is less common for music
 - Multiline entry is possible see 02 standard.md section 1.22
 
@@ -503,6 +530,7 @@ Note if you set arrays (e.g. `primaryArtists` or `contributors` array) on both a
 - `coverImage` is child of `releaseData` and represents images set by the artist to go with the release
 - `localCoverImage` is a child of `localPlaybackData` and represents images set by the user for this release or playlist. If set it overrides the `coverImage`.
 - `itemCoverImage` is a child of the `mediaList` array and represents per track/item images to be shown only when that item is playing. If set it overrides both `coverImage` and `localCoverImage`. 
+- For a `looseTrack`, `itemCoverImage` is the primary place for cover data because there is no `releaseData`.
 - All of these are optional
 - See `02 standard.md` section 1.27 Supported image formats for more information about acceptable image formats and the role of thumbnails
 - Note regarding thumbnails: only the original image NOT thumbnails is linked in the metadata file.
@@ -669,9 +697,9 @@ userNotes
 
 - child of root
 - required
-  - must have at least one entry
+  - when `noudataType` is `release` or `userPlaylist` then `mediaList` MUST have at least one entry; `looseTrack` and `linkTrack` MUST have exactly one
   - if omitted or invalid then not a valid `.noudata` file; produce warnings that it will be ignored
-  - EXCEPTION if the player supports dynamic playlists and the `searchString` property is present in `localPlaybackData` then this is a dynamic playlist; the player should perform a search to fill the `mediaList`
+  - EXCEPTION: if `localPlaybackData.searchString` is present, an empty or omitted `mediaList` is valid. This is a dynamic `userPlaylist`; the player should perform a search to fill it
 
 
 Structure overview (selectively expanded)
@@ -701,7 +729,7 @@ mediaList (array)
 
 ##### `uniteData` (object)
 - Is this required?   
-  - Full story: The purpose of `uniteData` is to enable the `unite` operation, that is
+  - Full story: The purpose of `uniteData` is to enable the `unite` operation, that is:
     - A player/media management software reads a Noubin URL and obtains the `web.noudata` metadata file about a release
     - The user then chooses a `releasePlatform` link to purchase and download the actual media from their choice of store
     - then the player/media management software unites those media files with the original metadata to create a `_<release>.noudata`
@@ -741,6 +769,7 @@ mediaList (array)
 ##### `mediaTitle` (string)
 - Is it required? 
   - Optional for `.noudata` files with a single item in the `mediaList`, then if omitted players should display the `playableItemTitle` (e.g. the release title.) as the title. 
+  - For `looseTrack` and `linkTrack` that should always be single items, `mediaTitle` is not reccomended. Instead use `playableItemTitle`.
   - Optional if this is a playlist. On a playlist the `localFilePaths` ideally refers to a media file that already has an authoritative `.noudata` file associated with it elsewhere in the library (that has been loaded into the players database). The player should take the `mediaTitle` from the authoritative data first. Fallback is to take it from the playlist `mediaTitle`  
   - `mediaTitle` is required for all other `.noudata` files with multiple media items 
 - It's the title of the song/track/chapter etc that should display in the player
@@ -766,7 +795,7 @@ The objects `itemCredits`,  `itemUserNotes` and `itemCoverImage` are defined abo
     - Optional
     - If present it means the media item should resume playback from this time when next played back
     - Intended usecase is resuming audiobooks, podcasts, mixes and other long media
-    - Recommended UX is only set this on items when `releaseProfile` = `podcast`, `audiobook` or `mix` AND longer than X minutes. Let the user change these preferences.
+    - Recommended UX is only set this on items when `playableItemProfile` is `podcast`, `audiobook` or `mix` AND longer than X minutes. Let the user change these preferences.
     - Ensure also that Players clear it when user reaches end of an item. 
     - Invalid if timestamp is greater than the media item length
   - `overrideResumeBehaviour` (enum: default | neverResume | alwaysResume) 
@@ -817,7 +846,10 @@ The objects `itemCredits`,  `itemUserNotes` and `itemCoverImage` are defined abo
   - Track listing of the tracks in a mix or live set. 
 - The other reason to have multiple lists is to allow overlapping events to happen, whilst enforcing a nice invariant that any single list shouldn't have overlapping events.
   - Which then saves you always having to enter an `endTime`; when it's omitted a player MUST assume the next `startTime` is also the end of the previous block. 
+- `cueLists` may appear on any media item regardless of `playableItemProfile`. 
+  - So a mix may have cues but does not have to.
 
+  
 Structure
 ```
 cueLists (array)
@@ -849,7 +881,7 @@ cueLists (array)
   - `nav` = navigation markers, e.g. chapter markers in an audio book.
   - `credits` = information about content inside the track e.g. guest in part of a podcast, track playing inside a mix. Also navigable by default. 
   - `text` = text of musical content (lyrics) and non musical content (script/transcript).
-    - Players can use `releaseProfile` from `releaseData` to display the option as `show lyrics` (for music) or `show transcript` (for podcast, audiobook etc)
+    - Players can use `playableItemProfile` to display the option as `show lyrics` (for music) or `show transcript` (for podcast, audiobook etc).
 - Note how `nav` and `credits` are kind of similar, why not combine them? Because a track could have both or even multiple cue lists of these types. Like main nav markers AND separate overlapping credits. 
 
 ##### `cueListTitle` (string)

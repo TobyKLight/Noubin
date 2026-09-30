@@ -189,7 +189,6 @@ When are End Users also Artists?
 - On the technical level every playable item is either
   - A) defined by a Noudata metadata file or
   - B) a single media file selected directly in the Noubin Player UI (when supported)
-
 ##### 1.24 Playlist
 - A collection of media items that is not itself a release from an artist. 
 - Items may still be associated with a release (so whilst an item is currently playing from playlist X it still shows relevant metadata from album Y that it originally came from)  
@@ -282,6 +281,11 @@ When are End Users also Artists?
 - Non-ASCII characters (e.g. accented Latin, Hangul, CJK) are possible if correctly percent-encoded as UTF-8 per RFC 3986 (e.g. `ä` → `%c3%a4`)
   - Because they are valid in a URL players SHOULD accept them and attempt to navigate to them
   - It is up to linkhosts if they support accepting percent-encoding in their own generated URL slugs. Their UX should only allow entry of `primaryArtistURLSafeName` and `playableItemURLSafeTitle` characters to support what the linkhost supports in its own URL segments. (So these values match whats actually used in the live Noubin URL)
+
+##### 1.31 Loose Track
+- One media file with its own metadata that belongs to no release and no playlist, created by the end user. 
+- E.g. tracks with no metadata where only the filename is known. Common in chaotic media libraries. 
+- As soon as the user adds some metadata this should be upgraded to a release and organised in the media library appropriately. 
 
 ## 2 NOUBIN URL AND LINKHOST SPECIFICATIONS 
 
@@ -399,7 +403,7 @@ A Noubin Player MUST
 
 A Noubin Player MUST NOT crash or block playback due to unrecognised or poorly formatted `.noudata` files. Particularly when encountering unknown property names or uknnown enum values. This is because the standard may be extended in future so players must fail gracefully if they encounter unsupported metadata. 
 
-Generally a player should never block playing of audio as long as you can find valid local files. 
+Generally a player should never block playing of audio as long as it can find valid local files. 
 Which means a minimal `.noudata` file should be playable as long as it contains: 
 - a `mediaList` array with at least one item 
 - that `mediaList` item contains at least one valid `localFilePaths` entry 
