@@ -265,7 +265,6 @@ When are End Users also Artists?
 - Players MAY support this function
 - It means that a user can perform a search on a media library and essentially save the search string itself into a Noubin
 - So when the user taps the Noubin again it does the search and plays the media
-- Also respecting other playback settings like shuffle
 - This allows the user to e.g. save a search for an artist to play all that artists songs, or save a search for a genre / category etc to play everything from that genre
 
 ##### 1.30 Safe URL path segments
@@ -598,7 +597,7 @@ A dynamic playlist is a `.noudata` playable item where:
 - `localPlaybackData.searchString` is set to a library search query
 - `mediaList` is empty (or omitted)
 
-When the user taps the associated Noubin, the player MUST run the search against the media library, use the results as the playlist for that playback session, and respect other `localPlaybackData` settings (e.g. `shuffle`).
+When the user taps the associated Noubin, the player MUST run the search against the media library, use the results as the playlist for that playback session.
 
 - Players MUST NOT treat an empty `mediaList` as invalid when `searchString` is present and dynamic playlists are supported
 - Players MUST NOT reject the `.noudata` file during library scan solely because it has no `mediaList` entries in this case

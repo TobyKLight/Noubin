@@ -597,32 +597,11 @@ Structure
 ```
 `localPlaybackData` (object)
 |
-|-- shuffle (boolean)
-|-- repeatList (boolean)
-|-- stopAfterEach (boolean)
 |-- resumeAtItem (integer: min 1)
 |-- searchString (string)
 |-- userNotes (object)
 |-- localCoverImage (object)
 ```
-
-
-##### `shuffle` (boolean)
-- optional
-- if true the player should shuffle the mediaList / playlist into random order
-- Generally this means that no track should be heard twice before the playlists reaches the end at least once
-- It's up to the player if the playlist shuffles again when the end of the playlist is reached 
-- For very long playlists on devices with limited performance it's permitted to do a true random function instead
-
-##### `repeatList` (boolean)
-- Optional
-- If true at the end of the mediaList / playlist the player should load the same mediaList again
-
-##### `stopAfterEach` (boolean)
-- Optional
-- If true the player should stop after each item in the mediaList / playlist and wait for the user to press play
-  - Use case is structured playback situations e.g. classrooms , exercise, sound effects where the user wants to play something and then speak/act after the media has ended before they manually trigger the next item. 
-- If false the player should automatically play the next item in the mediaList / playlist
 
 ##### `resumeAtItem` (integer: min 1)
 - Optional
