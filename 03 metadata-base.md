@@ -276,7 +276,7 @@ releaseData (object)
 - Writers SHOULD omit the property rather than write FALSE
 - Linkhosts MUST clear the property (remove it, or set it FALSE) in the same operation that publishes the promised media. See `02 standard.md` section 2.3 PENDING MEDIA for the full rules for artists and linkhosts
 - `pendingMedia` is artist-owned: when a player re-fetches a release from its Noubin URL, the web value is authoritative, including its absence
-- While this property is TRUE a `release` MAY have an empty or omitted `mediaList`. See the `mediaList` entry below and `02 standard.md` sections 2.3 and 3.1
+- While this property is TRUE a valid `web.noudata` file MAY have an empty or omitted `mediaList`. However it cannot be imported to the library. See the `mediaList` entry below and `02 standard.md` sections 2.3 and 3.1
 
 
 ---
