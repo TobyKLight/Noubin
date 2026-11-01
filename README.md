@@ -16,7 +16,7 @@ You can see the status of the [Plippa project here](https://nowwemake.com/plippa
 
 ----
 ### Status
-This is v0.4.1 of the standard. It should be considered highly volatile and there can potentially be significant breaking changes until v1.0 stable is reached after some real-world testing. 
+This is v0.5.0 of the standard. It should be considered highly volatile and there can potentially be significant breaking changes until v1.0 stable is reached after some real-world testing. 
 
 **If you'd like to implement the standard or contribute**: That'd be great! When you're ready please start a discussions thread to introduce yourself and what you're doing. We can share results and ideas and I can give you a heads up to discuss potentially breaking changes.
 
@@ -60,6 +60,10 @@ you are currently reading `readme.md`
 `03 metadata-base.md` the core metadata format 
 
 `QandA.md` further information about why the standard is designed this way
+
+#### OPTIONAL EXTENSIONS
+
+Optional add-ons to the core standard. Each extension is single .md file in the `extensions/` folder. An implementation that does not support an extension must still handle the file correctly: unknown properties are ignored, and data added by an extension should be preserved when the file is rewritten (see `02 standard.md` section 3.1.1).
 
 #### LICENCES AND BRANDING
 

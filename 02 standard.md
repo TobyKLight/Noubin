@@ -378,10 +378,32 @@ It's impossible to prevent that an Artist makes Noubins that have unique links i
 
 - Artists MUST NOT make Noubin URLS that are unique per Noubin
   - Excepted only when the user is clearly informed and told the reason they get a benefit from a unique link when they purchase the Noubin, not hidden in fine print. 
+  - The only exception currently defined by the standard is the Dedications extension (`extensions/dedications.md`), where the unique URL carries a personal dedication track for that one holder. That document sets the conditions under which the exception is acceptable, including informing the holder, keeping the media openly downloadable, and prohibiting per-dedication tracking. A linkhost MUST NOT treat that exception as a licence to make ordinary release URLs unique. 
 - Web consent mechanisms for tracking and private data collection are already regulated in many jurisdictions. For the removal of doubt Noubin Linkhosts MUST NOT track users using unique links unless they have explicitly consented. 
 
 Note there is no mechanism to offer users a consent banner for cookies/tracking when a Noubin Player accesses a `web.noudata` file. 
 - Hence linkhosts MUST NOT collect any non-anonymised data from Noubin Players accessing `web.noudata` files
+
+#### 2.3 PENDING MEDIA
+
+A release may be sold or given away with the promise of media that does not exist yet. The `releaseData.pendingMedia` boolean (`03 metadata-base.md`) marks that state, and tells players to re-check the Noubin URL each time the release is tapped so the media turns up when the artist publishes it.
+
+Example: a fan buys a Noubin at the merch desk before the show, with the promise that tonight's live recording will be added to it tomorrow. The Noubin may already carry a release and the live recording is a bonus track, or the live recording may be all the content the Noubin is intended to deliver.
+
+**Artists**
+- Artists MUST publish the promised media if they promised it. If they do not, they MUST clear the flag as below.
+- Artists MUST collect contact details from the fan when selling a Noubin whose media is pending, so the holder can be told if delivery is delayed etc. Linkhosts MAY automate this collection.
+- The promised media MUST either be freely downloadable, or be obtainable from a storefront that supports automatic download. If a storefront is used, the Noubin MUST be sold together with the download code or authorisation that storefront needs.
+
+**Linkhosts**
+- A linkhost MUST only set `pendingMedia` when it provides the artist with working functionality to add that media to the release later. Setting the flag without that functionality leaves the holder re-checking a release that can never change.
+- A linkhost MUST clear `pendingMedia` (remove it, or set it to `false`) in the same operation that publishes the promised media, and MUST NOT leave it set afterwards.
+- A linkhost MUST keep a release with the flag set fully usable in every other respect. Its existing tracks, purchase links and stream links MUST work as normal: the flag is additive and MUST NOT gate anything.
+- A linkhost MUST serve a `web.noudata` that is valid in all other respects while the flag is set, so a re-fetch costs the player one small request and cannot break a working library.
+- A linkhost MAY support collection of user contact details (email) when a Noubin with pending media is sold, so the fan can be informed when the pending media is available or if there are issues with delivery of the pending media. 
+- For a release whose promised media is its only content, the HTML page MUST show the message "The media for this release is not yet available" in place of the track listing, so a holder who has just bought the Noubin is not shown an empty or broken page. 
+- The linkhost MAY offer to show at Noubin URL HTML pages a precise date or time that the pending media will be available or other status message. 
+
 
 ## 3 NOUBIN PLAYER SPECIFICATIONS
 
@@ -402,12 +424,33 @@ A Noubin Player MUST
 
 A Noubin Player MUST NOT crash or block playback due to unrecognised or poorly formatted `.noudata` files. Particularly when encountering unknown property names or uknnown enum values. This is because the standard may be extended in future so players must fail gracefully if they encounter unsupported metadata. 
 
+##### 3.1.1 EXTENSIONS AND UNKNOWN PROPERTIES
+
+Extensions to the standard are separate documents in the `extensions/` folder. Each extension adds properties to the metadata format. These rules apply to every implementation, whether or not it knows the extension in use.
+
+- An implementation MUST ignore property names it does not recognise and MUST NOT treat their presence as an error, a reason to reject the file, or a reason to block playback.
+- An extension MUST be harmless when an implementation does not know it. Concretely: the playable item MUST still be usable, no core property may change meaning because the extension is absent, and an unknown property or item MUST degrade to sensible core behaviour rather than causing the item to be dropped or rejected.
+- An extension is declared by the presence of its properties. There is deliberately no root `extensions` declaration array; the name `extensions` is reserved in case a future core version needs one.
+- Players and media library management software SHOULD preserve unknown properties when they rewrite a `.noudata` file. Round-tripping a file through software that does not implement an extension MUST NOT silently delete that extension's data. Without this rule a player that ignores an extension would drop the data when saving the local release file, and a later implementation that does support the extension could never use it.
+- Third-party private extensions MUST prefix their property names so they can never collide with official fields, for example `x_<vendor>_<name>` (e.g. `x_acme_mood`). The prefix SHOULD identify the vendor or project.
+- Official extension names and unprefixed property names are reserved for extensions listed in the `extensions/` folder of this repository. An unofficial extension MUST NOT use an unprefixed property name or an official extension name.
+- An official extension document MUST state:
+  - its name and version, and the core standard version it was built from;
+  - the exact properties it adds, with a diagram of where they sit in the metadata tree;
+  - separate conformance rules for linkhosts, players and media library management software;
+  - how an implementation that does not know the extension behaves, and why that degradation is acceptable.
+
 Generally a player should never block playing of audio as long as it can find valid local files. 
 Which means a minimal `.noudata` file should be playable as long as it contains: 
 - a `mediaList` array with at least one item 
 - that `mediaList` item contains at least one valid `localFilePaths` entry 
 - the `localFilePaths` entry points to a valid media file 
-- note without a `normalisedNoubinKey` the file is not linked to a Noubin but may still be selectable for playback in the UI. 
+  - note without a `normalisedNoubinKey` the file is not linked to a Noubin but may still be selectable for playback in the UI. 
+
+**Exception — a release awaiting its media.** A `release` `.noudata` with an empty or omitted `mediaList` is valid only when `releaseData.pendingMedia` is `true` (see section 2.3 PENDING MEDIA). This is the single exception to the requirement in `03 metadata-base.md` that a `release` has at least one `mediaList` entry, and it exists so a Noubin can be sold before its content is finished.
+- Players MUST treat such a file as known metadata that is not yet playable. They MUST NOT treat it as invalid or corrupt, and MUST show a message such as "The media for this release is not yet available" when the user tries to play it. 
+- Players MUST NOT add such a release to the media library while its `mediaList` is empty. There is nothing to play and nothing to `unite`. 
+- Players and media library management software MUST NOT save a local `.noudata` file for a release whose `mediaList` is empty. The local-first lookup in section 3.2 would otherwise match that file on every later tap and never reach the web, so the holder could never pick up the media once the artist published it. 
 
 
 Noubin Players MAY
@@ -565,6 +608,16 @@ If the player supports web functions then all the following "MUST" and "SHOULD" 
 - If a Noubin URL web request fails on a hardware player the player MUST display the error message with an option like "open on your device" to offer that the URL can be passed to a mobile device see section 3.6 PASSING A URL TO A MOBILE DEVICE
   - Note this won't always make sense to open on your own device. 404 errors are likely to get the same result on a mobile device but it's up to the user to decide. 
 - If a 404 response includes a JSON formatted human readable error message (see section 2.1 LINKHOSTS and 404) than the player SHOULD display it. 
+
+**Re-checking a release with pending media**
+- The rule above forbids automated checks once a release is local, and there MUST NOT be any polling. Presense of `releaseData.pendingMedia` is the one exception: the artist has explicitly asked for this release to be re-checked (see section 2.3 PENDING MEDIA).
+- While the flag is set, the player MUST re-fetch the release's `web.noudata` from its Noubin URL when the release is tapped, applying Noubin URL Normalisation (section 6.3) and the fetch safety rules above.
+- The player MUST tell the user at that moment that it is checking the Noubin URL for pending media, showing as much of the URL as it can fit. A tap on a release that says more media is coming is the user asking for that check. 
+- The player SHOULD remember that consent for as long as the flag remains set, so the user is not asked again on every tap, and MUST stop re-fetching once the flag clears. 
+- The player MUST NOT re-fetch when the flag is absent or `false`, automatically or otherwise. 
+- The player SHOULD show that media is expected, so that the re-check is understandable rather than mysterious. 
+- When the re-fetch returns media, the player MUST add it following section 4.7 UNIFYING MEDIA FILES WITH WEB RELEASE DATA FOR INCLUSION IN A LOCAL MEDIA LIBRARY. The player MUST treat the web value of `pendingMedia` as authoritative, including its absence, so a flag the artist has cleared cannot come back from stale local data. 
+- Any re-fetched `web.noudata` file MUST completely replace the existing one. So for example the artist may update the release level credits data when they add a pending track. 
 
 **Direct Media Downloading**
 - If media files are available for direct download the player MUST prompt the user if they wish to download, and show the user the URL that will be accessed (or list of URLs, the user can consent at once to all)
@@ -837,7 +890,10 @@ Both media library software and players will be referred to as 'software' here.
   - The software should first attempt to use the expected names and lengths to automatically match the files to the metadata.
     - Where multiple good candidates are found (e.g. because user bought both MP3 and FLAC files) multiple files can be added to the `localFilePaths` array
   - If matches are not found for track entries in `web.noudata` then prompt the user to allocate remaining media files manually and when relevant show them files mentioned in the release are missing/can't be found.
-  - When all `mediaList` elements from `web.noudata` have at least one `localFilePaths` array entry AND all media files are accounted for the procedure is complete.
+  - Items marked supplementary by an extension are excluded from this completeness check. Currently the supplementary flags are:
+    - `isDedication` = `true` on a `mediaList` item (Dedications extension, see `extensions/dedications.md`)
+  - When all remaining `mediaList` elements from `web.noudata` have at least one `localFilePaths` array entry AND all media files are accounted for the procedure is complete.
+  - A `web.noudata` with no `mediaList` items MUST NOT be persisted as a local release, even though the condition above is satisfied vacuously by an empty list. When `releaseData.pendingMedia` is `true` the release is intentionally awaiting media (see section 2.3 PENDING MEDIA), in this case ofit is a valid `web.noudata` file but would not make a valid `_<release>.noudata` file and must not be added to the library yet. In both cases no `_<release>.noudata` may be written, so the local-first lookup in section 3.2 does not shadow a later fetch from the Noubin URL.
   - The now united metadata is saved as `_<release>.noudata` in the release folder (or `<trackName>.noudata` for a release with a single media item)
   - The player MUST set `noubinKey` to the literal Noubin Key extracted from the tapped tag's NDEF record (see section 6.1 Extracting the `noubinKey` from an NDEF record)
   - The player MUST set `noubinKeyNormalised` by applying Noubin Key Normalisation to that value (see section 6.2). This SHOULD also be indexed in the player's library database (e.g. a hash table) so future taps can be matched without re-normalising on every read

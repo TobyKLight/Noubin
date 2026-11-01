@@ -44,6 +44,7 @@ ROOT
 |-- referToReleaseNoudata (string)
 |-- releaseData (object)
 |    |
+|    |-- pendingMedia (boolean)
 |    |-- credits (object: defined below)
 |    |-- coverImage (object: defined below)
 |    |-- releasePlatforms (array)
@@ -203,6 +204,7 @@ Structure
 ```
 releaseData (object)
 |
+|-- pendingMedia (boolean)
 |-- credits (object: defined below)
 |-- coverImage (object: defined below)
 |-- releasePlatforms (array)
@@ -266,6 +268,15 @@ releaseData (object)
      - Required 
        - If omitted not a valid `furtherLinks` array element and the entire element should be ignored
      - The link URL provided by the artist
+
+##### `pendingMedia` (boolean)
+- Optional, if omitted assume FALSE
+- Child of `releaseData`
+- TRUE means media for this release has been promised to the holder but is not published yet, and a player should re-fetch the release from its Noubin URL when it is tapped so the media is picked up when it arrives
+- Writers SHOULD omit the property rather than write FALSE
+- Linkhosts MUST clear the property (remove it, or set it FALSE) in the same operation that publishes the promised media. See `02 standard.md` section 2.3 PENDING MEDIA for the full rules for artists and linkhosts
+- `pendingMedia` is artist-owned: when a player re-fetches a release from its Noubin URL, the web value is authoritative, including its absence
+- While this property is TRUE a `release` MAY have an empty or omitted `mediaList`. See the `mediaList` entry below and `02 standard.md` sections 2.3 and 3.1
 
 
 ---
@@ -679,6 +690,7 @@ userNotes
   - when `noudataType` is `release` or `userPlaylist` then `mediaList` MUST have at least one entry; `looseTrack` and `linkTrack` MUST have exactly one
   - if omitted or invalid then not a valid `.noudata` file; produce warnings that it will be ignored
   - EXCEPTION: if `localPlaybackData.searchString` is present, an empty or omitted `mediaList` is valid. This is a dynamic `userPlaylist`; the player should perform a search to fill it
+  - EXCEPTION: a `release` MAY have an empty or omitted `mediaList` when `releaseData.pendingMedia` is `true`, because the media is promised but not yet published. Such a release is valid metadata but not yet playable: players MUST NOT add it to the library and MUST NOT save it as a local `.noudata` file (see `02 standard.md` sections 2.3 and 3.1)
 
 
 Structure overview (selectively expanded)
