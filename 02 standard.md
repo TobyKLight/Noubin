@@ -116,7 +116,7 @@ When are End Users also Artists?
 - It MUST follow section 4 NOUBIN MEDIA LIBRARY SPECIFICATIONS
 
 ##### 1.17 Noubin Key
-- The string written into a Noubin NFC tag's first NDEF record that directs a Noubin Player to a Playable Item as defined by a `.noudata` file
+- The string written into a Noubin NFC tag's first NDEF record (or, for tags with no NDEF record on players that support it, derived from the tag UID, see section 1.18.1 UID Noubin Key) that directs a Noubin Player to a Playable Item as defined by a `.noudata` file
   - In plain english this is the text you write into an NFC tag that is then matched to an album/song/playlist etc. 
 - The raw noubin key read from the NFC tag is normalised according to the procedures in section 6.2 Noubin Key Normalisation, then compared to `noubinKeyNormalised` value of playable items in the media library. 
 - The Noubin Key is ideally formatted as either a 
@@ -135,6 +135,21 @@ When are End Users also Artists?
 - The purpose of the random string part is allowing Noubin Players to generate keys for items that have the same `playableItemTitle`, e.g. if the user accidentally creates two "Smooth Jazz" playlists which are in different parts of the media library.
 - The player MAY shorten the string if it exceeds the length that can be stored in the tag, e.g. for 48 byte tags. 
   - In the case of these very small tags recommend using only a random string. 
+
+##### 1.18.1 UID Noubin Key
+- A Noubin Key derived from the tag UID.
+- This is only applicable for Private Noubins whose tag has no readable NDEF Text or URI record AND is not writeable E.g. tags that contain data for some other non-NDEF application.  
+- These can still be used as private Noubins by reading the UID and using that to associate media. 
+- Format of the key: the literal string `uid:` followed by the UID bytes as lowercase hexadecimal, two digits per byte, most significant byte first as reported by the reader, with no separators. 
+  - e.g. `uid:04a1b2c3d4e5f6`
+  - Cascade tag bytes (`0x88`) used during anticollision are NOT part of the UID and MUST NOT be included. 
+- The `uid:` prefix prevents collisions with plain text Noubin Keys. 
+- The key is stored as `noubinKey` and normalised per section 6.2 like any other text key (the string is already lowercase and trimmed so normalisation leaves it unchanged).
+- A UID is neither secret nor guaranteed unique (4 byte UIDs in particular may repeat, and UIDs can be cloned). UID Noubin Keys are for convenience in a private library only and MUST NOT be treated as any form of authentication. 
+- Special case, Random UIDs: some tags and phones present a different UID on every activation. 
+  - A 4 byte UID whose first byte is `0x08` is a random UID per ISO 14443-3. Players MUST NOT use it as a Noubin Key. 
+  - When refusing, the player SHOULD tell the user the tag presents a random ID and cannot be used. 
+- Special case: Software Players whose underlying OS NFC API does not expose UIDs do not have to support this function. 
 
 ##### 1.19 Noubin URL
 - A full hyperlink accessible on the internet — a complete URL using `https`, 
@@ -496,11 +511,10 @@ Whilst the main functionality descriptions are in this document there is some sp
   - The player is a hardware player
 - Then the player SHOULD proceed to section 3.6 PASSING A URL TO A MOBILE DEVICE
 - Otherwise if no fallbacks are possible the player SHOULD show an error with a user-readable message
-  - If the Noubin Key is not recognised in this library, but after extraction it matches the recommended Local Noubin Key format (see section 1.18 Local Noubin Key), the error SHOULD explain that this is a "non-recognised Private Noubin" and SHOULD offer to associate it with media in this library (see section 3.4 MEDIA LIBRARY FUNCTIONS)
 
 - Players MUST support writing NFC tags when the tag is rewritable
   - In many cases users will supply blank rewriteable tags and to facilitate association the player should write a Local Noubin Key (text) to the tag and set it in the appropriate playable item `.noudata`file. 
-  - If the tag is locked / non-rewritable, **or** it is rewritable but its first record is a URI (a link), a player SHOULD NOT write to it, preserving the existing data. If it contains a readable text or URI string it can still be associated. Association then binds the existing string key in local `.noudata` metadata instead. See section 3.4 MEDIA LIBRARY FUNCTIONS (of players)
+  - If the tag is locked / non-rewritable, **or** it is rewritable but its first record is a URI (a link), a player SHOULD NOT write to it, preserving the existing data. Association then binds the existing string key in local `.noudata` metadata instead. See section 3.4 MEDIA LIBRARY FUNCTIONS (of players)
 
 
 
@@ -551,9 +565,9 @@ Whilst the main functionality descriptions are in this document there is some sp
     1. Read the tag and attempt to extract any existing Noubin Key (URI or text) per section 6.1, and determine whether the tag is rewritable and whether its first URI/Text record is a URI (a link).
     2. **Preferred — tag is rewritable AND does not carry a link** (blank, or its first record is a text record such as a Local Noubin Key): write a Local Noubin Key onto the tag as an NDEF text record (see section 1.18 Local Noubin Key), then set `noubinKey` / `noubinKeyNormalised` from what was written on the **new** target playable item. This applies whether the tag was blank or already contained a text key (overwrite). Adapt to tag capacity (some tags are as low as 48 bytes); do not finalise the string in `.noudata` until capacity is confirmed. Avoid collisions with existing `noubinKeyNormalised` values in the library by appending a random string.
       - **Re-association:** if this tag was previously associated with a different playable item, the default behaviour is only to create the new association on the new target. Do **not** remove `noubinKey` / `noubinKeyNormalised` from the old playable item. That preserves cases where the user has associated multiple Noubins with one target playable item (or where another tag still carries the old key) — reassigning one Noubin MUST NOT break the others. If the player has a suitable UI it SHOULD inform the user that the tag was associated with media X and will now also / instead be associated with media Y (using display titles, e.g. `playableItemTitle`), without implying that X loses its key.
-   3. **Keep — tag is locked / non-rewritable, OR rewritable but carries a link — AND a URI or text Noubin Key can be read:** do not attempt to write (a player MUST NOT overwrite a URI record). Instead use the existing value: Set `noubinKey` to the literal extracted value and `noubinKeyNormalised` by applying section 6.2 on the target playable item. The end user may associate any such readable tag with any local playable item they choose (e.g. Artist A's Official Noubin remapped to Artist B's album, a playlist, podcast, etc.). The player SHOULD tell the user that the existing link was kept.
+   3. **Keep — IF the tag is locked OR non-rewritable OR carries a link, AND a NDEF record or UID can be read:** do not attempt to write (a player MUST NOT overwrite a URI record). Instead use the existing value: Set `noubinKey` to the literal extracted value and `noubinKeyNormalised` by applying section 6.2 on the target playable item. The end user may associate any such readable tag with any local playable item they choose (e.g. Artist A's Official Noubin remapped to Artist B's album, a playlist, podcast, etc.). If there was a link the player SHOULD tell the user that the existing link was kept.
       - **Re-association:** because the chip key cannot change, associating the same locked tag a second time (to a different playable item) MUST move the binding: clear `noubinKey` and `noubinKeyNormalised` from any other playable item(s) in the library that currently match this `noubinKeyNormalised`, then set them on the newly chosen item. (Otherwise two items would have the same key and it's ambiguous which should play on a tap). If the player has a suitable UI it SHOULD inform the user that the tag is already associated with media X and will now be changed to media Y (using the items' display titles, e.g. `playableItemTitle`).
-    4. **Cannot associate — tag is locked / non-rewritable AND blank / empty / unreadable as URI or text:** association cannot complete; the player SHOULD tell the user the tag has no usable key and cannot be written.
+    5. **Cannot associate — tag is locked / non-rewritable AND blank / empty / unreadable as URI or text AND no usable UID Noubin Key is available (unsupported by the player, or random UID):** association cannot complete; the player SHOULD tell the user the tag has no usable key and cannot be written.
   - Optional during association: if an image of the physical Noubin is available (e.g. captured by the user or already present for that object), the player MAY add it to the playable item's metadata as a `localCoverImage` (or `coverImage` / `itemCoverImage` as appropriate) entry with `isImageOfNoubin` = true. See `03 metadata-base.md`.
   - Consequence of leaving keys in place on rewritable re-association: players MUST NOT treat "has a `noubinKey` / `noubinKeyNormalised` set" as proof that a playable item is currently associated with a physical Noubin. Items previously associated may retain stale keys that are no longer encoded on any Noubin the user still has. 
 - Players MAY implement further media and tag management functions including
@@ -901,7 +915,7 @@ Both media library software and players will be referred to as 'software' here.
   - When all remaining `mediaList` elements from `web.noudata` have at least one `localFilePaths` array entry AND all media files are accounted for the procedure is complete.
   - A `web.noudata` with no `mediaList` items MUST NOT be persisted as a local release, even though the condition above is satisfied vacuously by an empty list. When `releaseData.pendingMedia` is `true` the release is intentionally awaiting media (see section 2.3 PENDING MEDIA), in this case ofit is a valid `web.noudata` file but would not make a valid `_<release>.noudata` file and must not be added to the library yet. In both cases no `_<release>.noudata` may be written, so the local-first lookup in section 3.2 does not shadow a later fetch from the Noubin URL.
   - The now united metadata is saved as `_<release>.noudata` in the release folder (or `<trackName>.noudata` for a release with a single media item)
-  - The player MUST set `noubinKey` to the literal Noubin Key extracted from the tapped tag's NDEF record (see section 6.1 Extracting the `noubinKey` from an NDEF record)
+  - The player MUST set `noubinKey` to the literal Noubin Key extracted from the tapped tag's NDEF record (or the UID Noubin Key for tags with no NDEF record). See section 6.1 Extracting the `noubinKey`.
   - The player MUST set `noubinKeyNormalised` by applying Noubin Key Normalisation to that value (see section 6.2). This SHOULD also be indexed in the player's library database (e.g. a hash table) so future taps can be matched without re-normalising on every read
   - In case of errors the user should have an interface where they can reassign the linking of files to tracks
   - If album art is included both in purchased media files and also has been downloaded from the `web.noudata` metadata compare resolution of files and keep the higher resolution one as the primary album art entry.
@@ -1112,11 +1126,12 @@ IF the user agrees then the extracted `noubinKey` from the first step is normali
 
 Both procedures share the same first step (section 6.1 Extracting the Noubin Key from an NDEF record) to get a `noubinKey` 
 
-#### 6.1 Extracting the `noubinKey` from an NDEF record
+#### 6.1 Extracting the `noubinKey` from an NDEF record or tag UID 
 
-**Phase 1: NDEF Record check**
+**Phase 1: NDEF Record check and UID falllback**
 - The player MUST check if an NDEF record is available
-- Only URI (TNF = 1, Type = "U") or Text (TNF = 1, Type = "T") records are acceptable. 
+  - Only URI (TNF = 1, Type = "U") or Text (TNF = 1, Type = "T") records are acceptable. 
+- If no suitable NDEF record found read the UID of the tag 
 - Failing here SHOULD result in an error message to the user that the tag contains no data or non supported NDEF type and how to fix
 
 **Phase 2: Payload Extraction**
@@ -1130,6 +1145,13 @@ Both procedures share the same first step (section 6.1 Extracting the Noubin Key
     1. The player MUST read the initial Status Byte to determine the encoding and the length of the Language Code.
     2. The player MUST discard the Status Byte and the Language Code bytes.
     3. The player MUST decode the remaining bytes into a UTF-8 string (converting from UTF-16 to UTF-8 if indicated by the Status Byte to prevent endianness issues).
+* **For UID DATA:** (only when the tag has no valid URI or Text record and the player supports UID Noubin Keys, see section 1.18.1)
+    1. The player MUST obtain the UID of the tag as an ISO 14443-3A tag (4, 7 or 10 bytes).
+    2. The player MUST remove any cascade tag bytes (`0x88`) that appear in the raw anticollision data, leaving only the UID bytes. (Many reader libraries already do this and return the UID alone.)
+    3. The player MUST reject the UID if it is a random UID: a 4 byte UID whose first byte is `0x08`. The player SHOULD also re-activate the tag and read the UID a second time, and MUST reject it if the two values differ. When rejecting, the player SHOULD tell the user the tag presents a random ID and cannot be used.
+    4. The player MUST convert each UID byte to two lowercase hexadecimal digits, most significant byte first as reported by the reader, with no separators or spacing.
+    5. The player MUST prepend the literal string `uid:` to the hexadecimal string. 
+
 
 The resulting string is the **Noubin Key**. When storing in a `.noudata` file as `noubinKey`, players MUST save this literal extracted value without further modification.
 At this point the `noubinKey` could be written back into a Noubin and the Noubin would function the same as it did originally (including query parameters for example).
@@ -1158,6 +1180,13 @@ Each example shows what is encoded on the tag → the resulting **Noubin Key** (
 - Text payload `MyPlaylist01` → `MyPlaylist01`
 - Text payload `  summer mix  ` → `  summer mix  ` (whitespace not trimmed at this stage)
 
+*UID to key examples:*
+- 4 byte UID `0x1A 0x2B 0x3C 0x4D` → `uid:1a2b3c4d`
+- 7 byte UID `0x04 0xA1 0xB2 0xC3 0xD4 0xE5 0xF6` → `uid:04a1b2c3d4e5f6`
+- 4 byte UID `0x08 0x11 0x22 0x33` → rejected (random UID)
+
+
+
 #### 6.2 Noubin Key Normalisation
 
 Applied to a Noubin Key string to produce a **Normalised Noubin Key** for local library matching. Used when a tag is tapped (before lookup) and during the `unite` operation (saved as `noubinKeyNormalised` in `.noudata`).
@@ -1184,6 +1213,7 @@ The resulting string is the **Normalised Noubin Key**. Players MUST perform a by
 - If found but playback cannot start due to e.g. invalid local media file the player MUST give an appropriate error message e.g. ".noudata file found but media not found"
 
 **Notes on Noubin Key Normalisation:**
+- UID Noubin Keys (`uid:<hex>`) are text keys, not URLs, so the URL-only steps (3–7) do not apply. Steps 1–2 leave them unchanged. Example: `uid:04a1b2c3d4e5f6` > `uid:04a1b2c3d4e5f6`
 - Should Noubin Key normalisation remove `www.`? Yes — see step 5. Other subdomains stay.
 - Should Noubin Key normalisation add a trailing slash? Yes — see step 7. Do **not** strip `index.html` or other filenames here; that is only for HTTP fetch in section 6.3. A tag ending in `…/album/index.html` therefore normalises to a different key than `…/album/`.
 - Should non-ASCII letters be lowercased? No — only ASCII `A-Z` → `a-z` (step 1).
@@ -1278,5 +1308,7 @@ On the other hand locking prevents users doing things like overwriting the Noubi
 Locking does **not** prevent local remapping: when the preferred rewrite path is impossible, players MUST fall back to associating the existing readable URI or text Noubin Key with any local playable item the user chooses (see section 3.4). The chip content stays fixed; only the local `.noudata` binding changes.
 
 The same applies to a rewritable tag that carries a link: a player keeps the link and only binds it locally (see section 3.4), so the player never replaces an artist's link. Leaving a tag rewritable therefore still lets the user rewrite it with other NFC tools should e.g. the artists linkhost goes down, but it won't be overwritten through regular association in a Noubin Player.
+
+The extreme case is a proprietary tag with no NDEF record at all. Hardware Players can still bind such a tag locally in most cases by its UID. This may not be possible on software players where the OS does not expose UID data. 
 
 When locking is used the Noubin MUST be marketed as 'locked' or 'non-rewritable' so that end users know the limitations (they cannot rewrite the chip, but they can still remap locally via the existing key). See `Use of the name and logo.md`
