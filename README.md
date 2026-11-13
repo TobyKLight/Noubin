@@ -11,7 +11,7 @@ You can make Noubin URLS for free at [https://noubin.com/](https://noubin.com/).
 Noubins can be tapped on phones or played with dedicated Noubin hardware players. 
 
 The first Noubin hardware player is called Plippa. 
-We plan to release the Plippa software open source as a reference implementation of the Noubin standard. 
+The Plippa software, Plippasoft, is open source and is the reference implementation of the Noubin standard: [Plippasoft on GitHub](https://github.com/TobyKLight/Plippasoft). 
 You can see the status of the [Plippa project here](https://nowwemake.com/plippa). 
 
 ----
